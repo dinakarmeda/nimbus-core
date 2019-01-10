@@ -37,7 +37,11 @@
     "jsnlog": "^2.26.2",
     "moment": "^2.20.1",
     "net": "^1.0.2",
+<<<<<<< HEAD
     "nimbus-sass-module": "^1.18.22",
+=======
+    "nimbus-sass-module": "1.18.22",
+>>>>>>> a59cce30c2047769ddef4046bdbb95dedeff7f49
     "popper.js": "^1.12.9",
     "primeicons": "^1.0.0-beta.10",
     "primeng": "6.1.5",
