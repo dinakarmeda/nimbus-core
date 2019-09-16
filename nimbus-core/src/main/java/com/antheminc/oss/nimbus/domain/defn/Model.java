@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -68,6 +68,17 @@ public @interface Model {
 			Class<? extends Source> value() default EMPTY.class;
 			
 			String url() default "staticCodeValue";
+			
+			/**
+			 * <p>When {@code true}, attempts to retrieve
+			 * {@code "staticCodeValue"} calls made with {@link #url()} from the
+			 * "staticcodevalues" cache. <p>Note: There are other layers of
+			 * caching defined within the {@link Command} execution lifecycle,
+			 * but enabling this property will result in a more aggressive cache
+			 * retrieval strategy by fetching from the cache before the
+			 * {@link Command} has a chance to execute.
+			 */
+			boolean useParamValuesCacheOnLoad() default true;
 		}
 
 	}

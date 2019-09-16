@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.lang.annotation.Annotation;
 import com.antheminc.oss.nimbus.AnnotationUtil;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
+import com.antheminc.oss.nimbus.domain.model.state.extension.conditionals.AssignThenToTargetCaseConditionalHandler;
+import com.antheminc.oss.nimbus.domain.model.state.extension.conditionals.BooleanSetterConditionalHandler;
 
 /**
  * <p>This class can be used for conditional event handlers that need the
@@ -33,7 +35,11 @@ import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
  * @since 1.1
  *
  * @param <A> the annotation to provide support for
+ * @deprecated This class will likely be removed in the future. Consider
+ *             replacing implementations
+ *             with:<ul><li>{@link AssignThenToTargetCaseConditionalHandler}</li><li>{@link BooleanSetterConditionalHandler}</li></ul>
  */
+@Deprecated
 public abstract class EvalExprWithCrudDefaults<A extends Annotation> extends EvalExprWithCrudActions<A> {
 
 	private static final String ATTR_TARGET_PATH = "targetPath";

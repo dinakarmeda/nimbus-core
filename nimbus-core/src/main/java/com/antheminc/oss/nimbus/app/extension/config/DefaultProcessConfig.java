@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,18 +19,22 @@ import org.activiti.engine.impl.el.ExpressionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.MongoOperations;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.bpm.BPMGateway;
+import com.antheminc.oss.nimbus.domain.bpm.ProcessRepository;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiBPMGateway;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.ActivitiExpressionManager;
 import com.antheminc.oss.nimbus.domain.bpm.activiti.CommandExecutorTaskDelegate;
+import com.antheminc.oss.nimbus.domain.bpm.activiti.DefaultMongoProcessRepository;
 import com.antheminc.oss.nimbus.domain.cmd.exec.FunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.DefaultParamFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.nav.DefaultActionNewInitEntityFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.nav.PageIdEchoNavHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.AddFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.EvalFunctionHandler;
+import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.FilterFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.SetByRuleFunctionalHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.SetFunctionHandler;
 import com.antheminc.oss.nimbus.domain.cmd.exec.internal.process.StatelessBPMFunctionHanlder;
@@ -48,7 +52,7 @@ import com.antheminc.oss.nimbus.support.expr.SpelExpressionEvaluator;
 @Configuration 
 public class DefaultProcessConfig {
 	
-	@Value("${process.supportStatefulProcesses:#{true}}")
+	@Value("${nimbus.process.supportStatefulProcesses:#{true}}")
 	private Boolean supportStatefulProcesses;	
 		
 	@Bean
@@ -60,6 +64,11 @@ public class DefaultProcessConfig {
 	public BPMGateway bpmGateway(BeanResolverStrategy beanResolver){
 		return new ActivitiBPMGateway(beanResolver,supportStatefulProcesses);
 	}		
+	
+	@Bean
+	public ProcessRepository processRepository(MongoOperations mongoOps) {
+		return new DefaultMongoProcessRepository(mongoOps);
+	}
 	
 	@Bean(name="default._new$execute?fn=_initEntity")
 	public FunctionHandler<?, ?> defaultActionNewInitFunctionHandler(BeanResolverStrategy beanResolver){
@@ -112,8 +121,8 @@ public class DefaultProcessConfig {
 	}	
 	
 	@Bean(name="default._search$execute?fn=lookup")
-	public FunctionHandler<?, ?> lookupFunctionHandler(){
-		return new DefaultSearchFunctionHandlerLookup<>();
+	public FunctionHandler<?, ?> lookupFunctionHandler(BeanResolverStrategy beanResolver){
+		return new DefaultSearchFunctionHandlerLookup<>(beanResolver);
 	}
 	
 	@Bean(name="default._search$execute?fn=example")
@@ -125,10 +134,14 @@ public class DefaultProcessConfig {
 	public FunctionHandler<?, ?> queryFunctionHandler(){
 		return new DefaultSearchFunctionHandlerQuery<>();
 	}
-
+	
 	@Bean(name="default._process$execute?fn=_eval")
 	public EvalFunctionHandler<?,?> evalFunctionHandler(ExpressionManager expressionManager){
 		return new EvalFunctionHandler(expressionManager);
 	}
 
+	@Bean(name="default._process$execute?fn=_filter")
+	public FilterFunctionHandler filterFunctionHandler() {
+		return new FilterFunctionHandler();
+	}
 }

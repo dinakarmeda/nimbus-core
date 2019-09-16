@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -74,6 +74,9 @@ public abstract class AbstractFrameworkIngerationPersistableTests extends Abstra
 	
 	protected static final String RULE_CORE_DOMAIN_ALIAS = "ruletestcoremodel";
 	protected static final String RULE_CORE_PARAM_ROOT = PLATFORM_ROOT + "/" + RULE_CORE_DOMAIN_ALIAS;	
+	
+	protected static final String DTABLE_CORE_DOMAIN_ALIAS = "decisiontabletestcoremodel";
+	protected static final String DTABLE_CORE_PARAM_ROOT = PLATFORM_ROOT + "/" + DTABLE_CORE_DOMAIN_ALIAS;
 	
 	protected static final String BPM_DP_DOMAIN_ALIAS = "testtaskcontainermodel";
 	protected static final String BPM_DP_PARAM_ROOT = PLATFORM_ROOT + "/" + BPM_DP_DOMAIN_ALIAS;	

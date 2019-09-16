@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import com.antheminc.oss.nimbus.domain.defn.event.EventType;
+
 /**
  * Marker annotation for framework generated events
  * 
@@ -38,4 +40,7 @@ public @interface Event {
 	int DEFAULT_ORDER_NUMBER = Integer.MAX_VALUE; 
 	
 	int order() default DEFAULT_ORDER_NUMBER;
+	
+	EventType[] eventType() default {};
+	
 }

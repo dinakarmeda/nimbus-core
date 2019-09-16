@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -266,7 +266,7 @@ public class DefaultListParamState<T> extends AbstractListPaginatedParam<T> impl
 		return mapsToParam.findIfCollectionElem();	
 	}
 	
-	private boolean affectRemoveIfMappedOrUnMapped(ListElemParam<T> pElem) {
+	protected boolean affectRemoveIfMappedOrUnMapped(ListElemParam<T> pElem) {
 		// remove from collection entity state
 		List<T> currList = getState();//instantiateOrGet();
 		
@@ -281,7 +281,7 @@ public class DefaultListParamState<T> extends AbstractListPaginatedParam<T> impl
 		
 		
 		T elemToRemove = pElem.getState();
-		boolean isRemoved = currList.remove(elemToRemove);
+		boolean isRemoved = (elemToRemove==null) ? true : currList.remove(elemToRemove);
 		
 		// remove from collection model state
 		String elemId = pElem.getElemId();
@@ -455,5 +455,10 @@ public class DefaultListParamState<T> extends AbstractListPaginatedParam<T> impl
 			return;
 		}
 		this.elemLabels = elemLabels;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return this.findIfNested().getParams() == null || this.findIfNested().getParams().size() <= 0; 
 	}
 }

@@ -159,7 +159,7 @@
 // }
 
 // describe('BreadcrumbComponent', () => {
-//   beforeEach(async(() => {
+//   beforeEach(() => {
 //     TestBed.configureTestingModule({
 //       declarations: [
 //         BreadcrumbComponent
@@ -208,7 +208,7 @@
 // });
 
 // describe('BreadcrumbComponent', () => {
-//     beforeEach(async(() => {
+//     beforeEach(() => {
 //       TestBed.configureTestingModule({
 //         declarations: [
 //           BreadcrumbComponent
@@ -242,11 +242,11 @@
 //         app.ngOnInit();
 //         expect(breadcrumbService.getHomeBreadcrumb).toHaveBeenCalled();
 //       }));
-  
+
 //   });
 
 //   describe('BreadcrumbComponent', () => {
-//     beforeEach(async(() => {
+//     beforeEach(() => {
 //       TestBed.configureTestingModule({
 //         declarations: [
 //           BreadcrumbComponent
@@ -288,5 +288,5 @@
 //         app.ngOnInit();
 //         expect(breadcrumbService.getHomeBreadcrumb).toHaveBeenCalled();
 //       }));
-  
+
 //   });

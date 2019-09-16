@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class CommandElementLinked extends CommandElement implements Serializable
 		
 	}
 	
-	public CommandElementLinked(int seqNum, Type type, String alias, Long refId) {
+	public CommandElementLinked(int seqNum, Type type, String alias, RefId<?> refId) {
 		setSeqNum(seqNum);
 		setType(type);
 		setAlias(alias);
@@ -52,19 +52,6 @@ public class CommandElementLinked extends CommandElement implements Serializable
 		this(source.getSeqNum(), source.getType(), source.getAlias(), source.getRefId());
 		CommandElementLinked nextCloned = Optional.ofNullable(source.getNext()).map(n -> new CommandElementLinked(n)).orElse(null);
 		setNext(nextCloned);
-	}
-	
-	public CommandElementLinked cloneUpto(Type type, StringBuilder absoluteUri) {
-		if(getType().equals(type))
-			return null;
-		CommandElementLinked cloned = new CommandElementLinked(getSeqNum(), getType(), getAlias(), getRefId());
-		absoluteUri.append(getUri());
-		CommandElementLinked nextCloned = Optional.ofNullable(getNext()).map(n -> n.cloneUpto(type, absoluteUri)).orElse(null);
-		
-		if(nextCloned != null)
-			cloned.setNext(nextCloned);
-		
-		return cloned;
 	}
 	
 	public CommandElementLinked next() {

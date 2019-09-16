@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public class MockParam implements Param<Object> {
 	private String path = "";
 	private ValueAccessor valueAccessor = null;
 	private Object state = null;
+	private Object previousLeafState = null;
 	private boolean stateInitialized = false;
 	private StateType type = null;
 	private List<ParamValue> values = null;
@@ -77,6 +78,7 @@ public class MockParam implements Param<Object> {
 	private boolean nested;
 	private boolean leaf;
 	private StyleState style;
+	private boolean empty;
 
 	@Override
 	public String getConfigId() {

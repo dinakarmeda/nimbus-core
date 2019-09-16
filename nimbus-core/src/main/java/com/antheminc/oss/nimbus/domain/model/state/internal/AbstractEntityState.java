@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -312,18 +312,6 @@ public abstract class AbstractEntityState<T> implements EntityState<T> {
 		
 		Model<?> m = p.getType().findIfNested().getModel();
 		return (m == null) ? null : (Model<S>)m;
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	private static <T, P> P read(PropertyDescriptor pd, Supplier<T> mGet) {
-		try {
-			T target = mGet.get();
-			return (target == null) ? null : (P)pd.getReadMethod().invoke(target);
-		}
-		catch (Exception ex) {
-			throw new FrameworkRuntimeException(ex);
-		}
 	}
 	
 	@Override

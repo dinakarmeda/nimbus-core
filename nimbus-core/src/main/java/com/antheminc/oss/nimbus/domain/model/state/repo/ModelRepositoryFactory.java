@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.antheminc.oss.nimbus.domain.model.state.repo;
 
 import com.antheminc.oss.nimbus.domain.defn.Repo;
+import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 
 /**
  * @author Soham Chakravarti
@@ -27,5 +28,7 @@ public interface ModelRepositoryFactory {
 
 	public ModelRepository get(Repo.Database db);
 	
-	public ModelPersistenceHandler getHandler(Repo repo);
+	public ModelRepository get(ModelConfig<?> mConfig);
+
+	public ModelRepository get(Repo.Database db, String extensionBean);
 }

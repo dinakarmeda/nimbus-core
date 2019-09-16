@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package com.antheminc.oss.nimbus.domain.model.state.extension;
 
-import java.util.Arrays;
+import java.util.function.Consumer;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.defn.extension.VisibleConditional;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
+import com.antheminc.oss.nimbus.domain.model.state.extension.conditionals.BooleanSetterConditionalHandler;
 import com.antheminc.oss.nimbus.support.EnableLoggingInterceptor;
 
 /**
@@ -27,21 +28,14 @@ import com.antheminc.oss.nimbus.support.EnableLoggingInterceptor;
  *
  */
 @EnableLoggingInterceptor
-public class VisibleConditionalStateEventHandler extends EvalExprWithCrudActions<VisibleConditional> {
+public class VisibleConditionalStateEventHandler extends BooleanSetterConditionalHandler<VisibleConditional> {
 
 	public VisibleConditionalStateEventHandler(BeanResolverStrategy beanResolver) {
 		super(beanResolver);
 	}
-	
-	@Override	
-	protected void handleInternal(Param<?> onChangeParam, VisibleConditional configuredAnnotation) {
-		boolean isTrue = evalWhen(onChangeParam, configuredAnnotation.when());
-		
-		// validate target param to enable
-		String[] targetPaths = configuredAnnotation.targetPath();
 
-		Arrays.asList(targetPaths).stream()
-			.forEach(targetPath -> handleInternal(onChangeParam, targetPath, targetParam->targetParam.setVisible(isTrue)));
-		
+	@Override
+	protected Consumer<Boolean> setter(Param<?> targetParam) {
+		return targetParam::setVisible;
 	}
 }

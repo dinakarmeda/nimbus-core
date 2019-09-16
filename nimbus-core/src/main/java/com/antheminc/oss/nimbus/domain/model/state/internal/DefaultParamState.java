@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.util.ClassUtils;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
@@ -86,6 +86,9 @@ public class DefaultParamState<T> extends AbstractEntityState<T> implements Para
 	
 	@JsonIgnore
 	private boolean active = true;
+	
+	@JsonIgnore
+	private T previousLeafState;
 	
 	@JsonIgnore
 	private RemnantState<Boolean> visibleState = this.new RemnantState<>(true);
@@ -361,6 +364,7 @@ public class DefaultParamState<T> extends AbstractEntityState<T> implements Para
 		boolean isLeaf = isLeafOrCollectionWithLeafElems();
 		final T localPotentialOldState = isLeaf ? getState() : null;
 
+		this.previousLeafState = localPotentialOldState;
 		state = preSetState(localPotentialOldState, state, localLockId, execRt, cb);
 		
 		Action a = getAspectHandlers().getParamStateGateway()._set(this, state); 
@@ -483,7 +487,31 @@ public class DefaultParamState<T> extends AbstractEntityState<T> implements Para
 	
 	@Override
 	public boolean deregisterConsumer(MappedParam<?, T> subscriber) {
+		boolean startNodeRemoved = degisterThis(subscriber);
+		
+//		traverse(subscriber);
+		return startNodeRemoved;
+	}
+	
+	private boolean degisterThis(MappedParam<?, ?> subscriber) {
 		return getEventSubscribers().remove(subscriber);
+	}
+	
+	private void traverse(Param<?> p) {
+		if(!p.isNested())
+			return;
+		
+		if(p.findIfNested().templateParams().isNullOrEmpty())
+			return;
+		
+		p.findIfNested().getParams().stream()
+			.forEach(cp->{
+				if(cp.isMapped()) 
+					degisterThis(p.findIfMapped());
+					
+				traverse(cp);
+				
+			});
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -886,8 +914,12 @@ public class DefaultParamState<T> extends AbstractEntityState<T> implements Para
 		if(!to) {
 			setStateInitialized(false);
 			
-			if(!isPrimitive())
-				setState(null);
+			if(!isPrimitive()) {
+				if(this.isCollection())
+					findIfCollection().clear();
+				else
+					setState(null);
+			}
 		} else {
 			initState(); // ensure all rules are fired
 		}
@@ -1027,4 +1059,17 @@ public class DefaultParamState<T> extends AbstractEntityState<T> implements Para
 	public void setStyle(StyleState styleState) {
 		this.styleState.setState(styleState);
 	}
+
+	@Override
+	public boolean isEmpty() {
+		T leafState = this.getLeafState();
+		if (leafState == null) {
+			return true;
+		}
+		if (String.class == this.getType().getConfig().getReferredClass()) {
+			return ((String) leafState).isEmpty();
+		}
+		return false;
+	}
+
 }

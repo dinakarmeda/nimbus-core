@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import com.antheminc.oss.nimbus.domain.cmd.CommandBuilder;
 import com.antheminc.oss.nimbus.domain.cmd.CommandMessage;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.Output;
+import com.antheminc.oss.nimbus.domain.defn.Constants;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutorGateway;
 import com.antheminc.oss.nimbus.domain.model.config.ParamValue;
 import com.antheminc.oss.nimbus.domain.model.state.extension.StaticCodeValueBasedCodeToLabelConverter;
@@ -59,6 +60,8 @@ import com.antheminc.oss.nimbus.entity.user.ClientUserGroup;
 import com.antheminc.oss.nimbus.entity.user.GroupUser;
 import com.antheminc.oss.nimbus.test.domain.support.AbstractFrameworkIntegrationTests;
 import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreEntityAccess;
+import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleDomain;
+import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleNestedDomain;
 
 
 /**
@@ -74,7 +77,6 @@ public class DefaultActionExecutorSearchTest extends AbstractFrameworkIntegratio
 	protected static final String CLIENT_USER_ALIAS = "clientuser";
 	protected static final String CLIENT_USER_GROUP_ALIAS = "clientusergroup";
 	protected static final String QUEUE_ALIAS = "queue";
-	protected static final String STATIC_CODE_VALUE_ALIAS = "staticCodeValue";
 	
 	private static final String[] COLLECTIONS = {QUEUE_ALIAS, CLIENT_USER_ALIAS, CLIENT_USER_GROUP_ALIAS,SAMPLE_CORE_ENTITY_ACCESS_ALIAS};
 	
@@ -90,15 +92,15 @@ public class DefaultActionExecutorSearchTest extends AbstractFrameworkIntegratio
 	
 	@Test
 	public void t1_testSearchByLookupStaticCodeValue() {
-		this.mongoOps.dropCollection("staticCodeValue");
+		this.mongoOps.dropCollection(Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		
 		final List<ParamValue> expectedValues = new ArrayList<>();
 		expectedValues.add(new ParamValue("code1", "label1", "desc1"));
-		final StaticCodeValue expected = new StaticCodeValue("/status", expectedValues);
+		final StaticCodeValue expected = new StaticCodeValue("/status0", expectedValues);
 		expected.setId(new Random().nextLong());
-		this.mongoOps.insert(expected, "staticCodeValue");
+		this.mongoOps.insert(expected, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		
-		CommandMessage cmdMsg = build(PLATFORM_ROOT+"/staticCodeValue/_search?fn=lookup&where=staticCodeValue.paramCode.eq('/status')");
+		CommandMessage cmdMsg = build(PLATFORM_ROOT+"/staticCodeValue/_search?fn=lookup&where=staticCodeValue.paramCode.eq('/status0')");
 		
 		MultiOutput multiOp = this.commandGateway.execute(cmdMsg);
 		List<Output<?>> ops  = multiOp.getOutputs();
@@ -112,14 +114,97 @@ public class DefaultActionExecutorSearchTest extends AbstractFrameworkIntegratio
 		assertEquals(expectedValues.get(0).getDesc(), values.get(0).getDesc());
 	}
 	
+	/**
+	 * This test method shows how to sort the Param Values of staticCodeValue search in descending order in memory (once mongoDB result is available).
+	 * The orderby property expects the value in propertyName.direction pattern.
+	 * <p> e.g. if you want to sort the param values in descending order based on <code>code</code> property of <code>ParamValue</code> class, 
+	 * you would use below configuration.
+	 */
+	@Test
+	public void t0_testSearchByLookupStaticCodeValue_inMemorySorted() {
+		this.mongoOps.dropCollection(Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
+		
+		final List<ParamValue> expectedValues = new ArrayList<>();
+		expectedValues.add(new ParamValue(Long.valueOf(1), "label1", "desc1"));
+		expectedValues.add(new ParamValue(Long.valueOf(2), "label2", "desc2"));
+		final StaticCodeValue expected = new StaticCodeValue("/status1", expectedValues);
+		expected.setId(new Random().nextLong());
+		this.mongoOps.insert(expected, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
+		
+		CommandMessage cmdMsg = build(PLATFORM_ROOT+"/staticCodeValue/_search?fn=lookup&where=staticCodeValue.paramCode.eq('/status1')&orderby=code.desc()");
+		
+		MultiOutput multiOp = this.commandGateway.execute(cmdMsg);
+		List<Output<?>> ops  = multiOp.getOutputs();
+		
+		assertNotNull(ops);
+		
+		final List<ParamValue> values = (List<ParamValue>)ops.get(0).getValue();
+		assertEquals(2, values.size());
+		assertEquals(expectedValues.get(1).getCode(), values.get(0).getCode());
+		assertEquals(expectedValues.get(1).getLabel(), values.get(0).getLabel());
+		
+		assertEquals(expectedValues.get(0).getCode(), values.get(1).getCode());
+		assertEquals(expectedValues.get(0).getLabel(), values.get(1).getLabel());
+	}
+	
+	/**
+	 * This test method shows how to sort staticCodeValue search in MongoDB.
+	 * The orderby property expects the value in domainAlias.propertyName.direction pattern.
+	 * <p> e.g. if you want to sort the staticCodeValues in descending order based on <code>paramCode</code> property of <code>StaticCodeValue</code> class, 
+	 * you would use below configuration.
+	 */
+	@Test
+	public void testSearchByLookupStaticCodeValue_dbsorted() {
+		this.mongoOps.dropCollection(Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
+		
+		final List<ParamValue> expectedValues = new ArrayList<>();
+		expectedValues.add(new ParamValue(Long.valueOf(1), "slabel1", "sdesc1"));
+		expectedValues.add(new ParamValue(Long.valueOf(2), "slabel2", "sdesc2"));
+		final StaticCodeValue expected = new StaticCodeValue("/status1", expectedValues);
+		expected.setId(new Random().nextLong());
+		this.mongoOps.insert(expected, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
+		
+		final List<ParamValue> expectedValues2 = new ArrayList<>();
+		expectedValues2.add(new ParamValue(Long.valueOf(1), "clabel1", "cdesc1"));
+		expectedValues2.add(new ParamValue(Long.valueOf(2), "clabel2", "cdesc2"));
+		final StaticCodeValue expected2 = new StaticCodeValue("/category", expectedValues);
+		expected2.setId(new Random().nextLong());
+		this.mongoOps.insert(expected2, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
+		
+		CommandMessage cmdMsg = build(PLATFORM_ROOT+"/staticCodeValue/_search?fn=query&orderby=staticCodeValue.paramCode.desc()");
+		
+		MultiOutput multiOp = this.commandGateway.execute(cmdMsg);
+		List<Output<?>> ops  = multiOp.getOutputs();
+		
+		assertNotNull(ops);
+		
+		final List<StaticCodeValue> values = (List<StaticCodeValue>)ops.get(0).getValue();
+		assertEquals(2, values.size());
+		assertEquals(expected.getParamCode(), values.get(0).getParamCode());
+		assertEquals(expected2.getParamCode(), values.get(1).getParamCode());
+		
+		cmdMsg = build(PLATFORM_ROOT+"/staticCodeValue/_search?fn=query&orderby=staticCodeValue.paramCode.asc()");
+		
+		multiOp = this.commandGateway.execute(cmdMsg);
+		ops  = multiOp.getOutputs();
+		
+		assertNotNull(ops);
+		
+		final List<StaticCodeValue> values2 = (List<StaticCodeValue>)ops.get(0).getValue();
+		assertEquals(2, values2.size());
+		assertEquals(expected2.getParamCode(), values2.get(0).getParamCode());
+		assertEquals(expected.getParamCode(), values2.get(1).getParamCode());
+	
+	}
+	
 	@Test
 	public void t11_testSearchByLookupStaticCodeValueElemMatch() {
-		this.mongoOps.dropCollection("staticCodeValue");
+		this.mongoOps.dropCollection(Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		final List<ParamValue> expectedValues = new ArrayList<>();
 		expectedValues.add(new ParamValue("ACL", "Anticardiolpin Antibodies", null));
 		final StaticCodeValue expected = new StaticCodeValue("anything", expectedValues);
 		expected.setId(new Random().nextLong());
-		this.mongoOps.insert(expected, "staticCodeValue");
+		this.mongoOps.insert(expected, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		
 		assertEquals("Anticardiolpin Antibodies", this.labelConverter.serialize("ACL"));
 	}
@@ -192,16 +277,17 @@ public class DefaultActionExecutorSearchTest extends AbstractFrameworkIntegratio
 
 	@Test
 	public void t5_testSearchByQueryWithProjection() {
-		this.mongoOps.dropCollection("staticCodeValue");
+		this.mongoOps.dropCollection(Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		final List<ParamValue> expectedValues = new ArrayList<>();
 		expectedValues.add(new ParamValue("code1", "label1", "desc1"));
 		final StaticCodeValue expected = new StaticCodeValue("/status", expectedValues);
 		expected.setId(new Random().nextLong());
-		this.mongoOps.insert(expected, "staticCodeValue");
+		this.mongoOps.insert(expected, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		
 		CommandMessage cmdMsg = build(PLATFORM_ROOT+"/staticCodeValue/_search?fn=query&where=staticCodeValue.paramCode.eq('/status')&projection.alias=vstaticCodeValue");
 		
 		MultiOutput multiOp = this.commandGateway.execute(cmdMsg);
+		
 		List<VStaticCodeValue> values = (List<VStaticCodeValue>) multiOp.getSingleResult();
 		
 		assertNotNull(values);
@@ -209,15 +295,163 @@ public class DefaultActionExecutorSearchTest extends AbstractFrameworkIntegratio
 		assertEquals("/status", values.get(0).getParamCode());
 	}
 	
+	
+	@Test
+	public void test_dynamicLookUpWithProjection() {
+		SampleDomain entity1 = new SampleDomain();
+		SampleNestedDomain nestedEntity1 = new SampleNestedDomain();
+		entity1.setId(2L);
+		entity1.setAttr_String("searchString");
+		nestedEntity1.setNested_attr_String("nestedAttribute1");
+		entity1.setAttr_NestedEntity(nestedEntity1);
+		
+		SampleDomain entity2 = new SampleDomain();
+		SampleNestedDomain nestedEntity2 = new SampleNestedDomain();
+		entity2.setId(3L);
+		entity2.setAttr_String("searchString1");
+		nestedEntity2.setNested_attr_String("nestedAttribute2");
+		entity2.setAttr_NestedEntity(nestedEntity2);
+			
+		mongo.insert(entity1, "sample_domain");
+		mongo.insert(entity2, "sample_domain");
+		
+		CommandMessage cmdMsg = build(PLATFORM_ROOT+"/sample_domain/_search?fn=lookup&where=sample_domain.attr_String.eq('searchString')&projection.mapsTo=code:id,label:attr_NestedEntity.nested_attr_String");
+		
+		MultiOutput multiOp = this.commandGateway.execute(cmdMsg);
+		List<Output<?>> ops  = multiOp.getOutputs();
+		
+		assertNotNull(ops);
+		
+		List<ParamValue> values = (List<ParamValue>)ops.get(0).getValue();
+		
+		assertNotNull(values);
+		assertEquals(1, values.size());
+		assertEquals("nestedAttribute1", values.get(0).getLabel());
+		
+		CommandMessage cmdMsg1 = build(PLATFORM_ROOT+"/sample_domain/_search?fn=lookup&projection.mapsTo=code:id,label:attr_NestedEntity.nested_attr_String");
+		
+		MultiOutput multiOp1 = this.commandGateway.execute(cmdMsg1);
+		List<Output<?>> ops1  = multiOp1.getOutputs();
+		
+		assertNotNull(ops1);
+		
+		List<ParamValue> values1 = (List<ParamValue>)ops1.get(0).getValue();
+		
+		assertNotNull(values1);
+		assertEquals(2, values1.size());
+		
+		assertEquals("nestedAttribute1", values1.get(0).getLabel());
+		assertEquals("nestedAttribute2", values1.get(1).getLabel());
+	
+		
+		CommandMessage cmdMsg2 = build(PLATFORM_ROOT+"/sample_domain/_search?fn=lookup&projection.mapsTo=code:id,label:attr_NestedEntity.nested_attr_String2");
+		try {
+			MultiOutput multiOp2 = this.commandGateway.execute(cmdMsg2);
+			List<Output<?>> ops2  = multiOp2.getOutputs();
+		} catch(Exception ex) {
+			assertNotNull(ex);
+			assertEquals(ex.getCause().getMessage(),"EL1008E: Property or field 'nested_attr_String2' cannot be found on object of type 'com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleNestedDomain' - maybe not public or not valid?");
+		}
+	}
+	
+	/**
+	 * This test method shows how to sort the Param Values of dynamic lookup in descending order in memory (once mongoDB result is available).
+	 * The orderby property expects the value in propertyName.direction pattern.
+	 * <p> e.g. if you want to sort the param values in descending order based on <code>label</code> property of <code>ParamValue</code> class, 
+	 * you would use below configuration.
+	 */
+	@Test
+	public void test_dynamicLookUpWithProjection_inMemorySorted() {
+		mongo.dropCollection("sample_domain");
+		
+		SampleDomain entity1 = new SampleDomain();
+		SampleNestedDomain nestedEntity1 = new SampleNestedDomain();
+		entity1.setId(2L);
+		entity1.setAttr_String("searchString");
+		nestedEntity1.setNested_attr_String("nestedAttribute1");
+		entity1.setAttr_NestedEntity(nestedEntity1);
+		
+		SampleDomain entity2 = new SampleDomain();
+		SampleNestedDomain nestedEntity2 = new SampleNestedDomain();
+		entity2.setId(3L);
+		entity2.setAttr_String("searchString1");
+		nestedEntity2.setNested_attr_String("nestedAttribute2");
+		entity2.setAttr_NestedEntity(nestedEntity2);
+			
+		mongo.insert(entity1, "sample_domain");
+		mongo.insert(entity2, "sample_domain");
+		
+		CommandMessage cmdMsg1 = build(PLATFORM_ROOT+"/sample_domain/_search?fn=lookup&projection.mapsTo=code:id,label:attr_NestedEntity.nested_attr_String&orderby=label.desc()");
+		
+		MultiOutput multiOp1 = this.commandGateway.execute(cmdMsg1);
+		List<Output<?>> ops1  = multiOp1.getOutputs();
+		
+		assertNotNull(ops1);
+		
+		List<ParamValue> values1 = (List<ParamValue>)ops1.get(0).getValue();
+		
+		assertNotNull(values1);
+		assertEquals(2, values1.size());
+		
+		assertEquals("nestedAttribute2", values1.get(0).getLabel());
+		assertEquals("nestedAttribute1", values1.get(1).getLabel());
+	
+	}
+	
+	/**
+	 * This test method shows how to sort dynamic lookup param values in MongoDB.
+	 * The orderby property expects the value in domainAlias.propertyName.direction pattern.
+	 * <p> e.g. if you want to sort the sample_domain based param values in descending order based on <code>nested_attr_String</code> nested property of <code>sample_domain</code> class, 
+	 * you would use below configuration.
+	 */
+	@Test
+	public void test_dynamicLookUpWithProjection_dbSorted() {
+		mongo.dropCollection("sample_domain");
+		
+		SampleDomain entity1 = new SampleDomain();
+		SampleNestedDomain nestedEntity1 = new SampleNestedDomain();
+		entity1.setId(2L);
+		entity1.setAttr_String("searchString");
+		nestedEntity1.setNested_attr_String("nestedAttribute1");
+		entity1.setAttr_NestedEntity(nestedEntity1);
+		
+		SampleDomain entity2 = new SampleDomain();
+		SampleNestedDomain nestedEntity2 = new SampleNestedDomain();
+		entity2.setId(3L);
+		entity2.setAttr_String("searchString1");
+		nestedEntity2.setNested_attr_String("nestedAttribute2");
+		entity2.setAttr_NestedEntity(nestedEntity2);
+			
+		mongo.insert(entity1, "sample_domain");
+		mongo.insert(entity2, "sample_domain");
+		
+		CommandMessage cmdMsg1 = build(PLATFORM_ROOT+"/sample_domain/_search?fn=lookup&projection.mapsTo=code:id,label:attr_NestedEntity.nested_attr_String&orderby=sample_domain.attr_NestedEntity.nested_attr_String.desc()");
+		
+		MultiOutput multiOp1 = this.commandGateway.execute(cmdMsg1);
+		List<Output<?>> ops1  = multiOp1.getOutputs();
+		
+		assertNotNull(ops1);
+		
+		List<ParamValue> values1 = (List<ParamValue>)ops1.get(0).getValue();
+		
+		assertNotNull(values1);
+		assertEquals(2, values1.size());
+		
+		assertEquals("nestedAttribute2", values1.get(0).getLabel());
+		assertEquals("nestedAttribute1", values1.get(1).getLabel());
+	
+	}
+	//orderby=sampletask.taskName.asc()
+	
 	@Test
 	public void t6_testSearchByQueryWithCountAggregation() {
-		this.mongoOps.dropCollection("staticCodeValue");
+		this.mongoOps.dropCollection(Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		StaticCodeValue scv = new StaticCodeValue("/status", null);
 		scv.setId(new Random().nextLong());
 		StaticCodeValue scv2 = new StaticCodeValue("/status", null);
 		scv2.setId(new Random().nextLong());
-		this.mongoOps.insert(scv, "staticCodeValue");
-		this.mongoOps.insert(scv2, "staticCodeValue");
+		this.mongoOps.insert(scv, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
+		this.mongoOps.insert(scv2, Constants.PARAM_VALUES_DOMAIN_ALIAS.code);
 		
 		CommandMessage cmdMsg = build(PLATFORM_ROOT+"/staticCodeValue/_search?fn=query&where=staticCodeValue.paramCode.eq('/status')&aggregate=count");
 		
@@ -264,7 +498,7 @@ public class DefaultActionExecutorSearchTest extends AbstractFrameworkIntegratio
 		createQueues();
 		
 		String query = "{" + 
-				"    \"aggregate\" : \"clientusergroup\"," + 
+				"    aggregate : \"clientusergroup\"," + 
 				"    \"pipeline\" : [ " + 
 				"        {" + 
 				"			$match: {" + 

@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public final class StateEvent {
 	
 	@Retention(RUNTIME)
 	@Target(ANNOTATION_TYPE)
-	@Event
+	@Event(eventType = EventType.OnStateLoad)
 	@Inherited
 	public @interface OnStateLoad {
 		int order() default Event.DEFAULT_ORDER_NUMBER;
@@ -40,7 +40,7 @@ public final class StateEvent {
 
 	@Retention(RUNTIME)
 	@Target(ANNOTATION_TYPE)
-	@Event
+	@Event(eventType = EventType.OnStateLoadNew)
 	@Inherited
 	public @interface OnStateLoadNew {	// Blank Constructor  -- Action._new: OnStateLoadNew
 		int order() default Event.DEFAULT_ORDER_NUMBER;
@@ -48,7 +48,7 @@ public final class StateEvent {
 	
 	@Retention(RUNTIME)
 	@Target(ANNOTATION_TYPE)
-	@Event
+	@Event(eventType = EventType.OnStateLoadGet)
 	@Inherited
 	public @interface OnStateLoadGet { // Args Constructor  -- Action._get: OnStateLoadGet
 		int order() default Event.DEFAULT_ORDER_NUMBER;
@@ -57,7 +57,7 @@ public final class StateEvent {
 	
 	@Retention(RUNTIME)
 	@Target(ANNOTATION_TYPE)
-	@Event
+	@Event(eventType = EventType.OnStateChange)
 	@Inherited
 	public @interface OnStateChange {
 		int order() default Event.DEFAULT_ORDER_NUMBER;
@@ -65,9 +65,11 @@ public final class StateEvent {
 	
 	@Retention(RUNTIME)
 	@Target(ANNOTATION_TYPE)
-	@Event
+	@Event(eventType = EventType.OnTxnExecute)
 	@Inherited
 	public @interface OnTxnExecute {
 		int order() default Event.DEFAULT_ORDER_NUMBER;
 	}
+
+
 }

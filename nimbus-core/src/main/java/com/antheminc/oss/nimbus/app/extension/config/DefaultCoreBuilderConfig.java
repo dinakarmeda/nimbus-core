@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -39,8 +39,10 @@ import com.antheminc.oss.nimbus.domain.config.builder.AnnotationAttributeHandler
 import com.antheminc.oss.nimbus.domain.config.builder.AnnotationConfigHandler;
 import com.antheminc.oss.nimbus.domain.config.builder.DefaultAnnotationConfigHandler;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
+import com.antheminc.oss.nimbus.domain.config.builder.EventAnnotationConfigHandler;
 import com.antheminc.oss.nimbus.domain.config.builder.attributes.ConstraintAnnotationAttributeHandler;
 import com.antheminc.oss.nimbus.domain.config.builder.attributes.DefaultAnnotationAttributeHandler;
+import com.antheminc.oss.nimbus.domain.model.config.EntityConfig.Scope;
 import com.antheminc.oss.nimbus.domain.model.config.builder.EntityConfigBuilder;
 import com.antheminc.oss.nimbus.domain.model.config.builder.internal.DefaultEntityConfigBuilder;
 import com.antheminc.oss.nimbus.domain.model.config.builder.internal.DefaultExecutionConfigProvider;
@@ -52,7 +54,6 @@ import com.antheminc.oss.nimbus.domain.model.state.builder.EntityStateBuilder;
 import com.antheminc.oss.nimbus.domain.model.state.builder.QuadModelBuilder;
 import com.antheminc.oss.nimbus.domain.model.state.builder.internal.DefaultEntityStateBuilder;
 import com.antheminc.oss.nimbus.domain.model.state.builder.internal.DefaultQuadModelBuilder;
-import com.antheminc.oss.nimbus.domain.model.state.extension.ChangeLogCommandEventHandler;
 import com.antheminc.oss.nimbus.support.DefaultLoggingInterceptor;
 import com.antheminc.oss.nimbus.support.SecurityUtils;
 
@@ -65,16 +66,20 @@ import lombok.Setter;
  */
 @Configuration
 @EnableConfigurationProperties
-@ConfigurationProperties(prefix="domain.model")
+@ConfigurationProperties(prefix="nimbus.domain.model")
 @Getter @Setter
 @EnableAspectJAutoProxy(proxyTargetClass=true)
 public class DefaultCoreBuilderConfig {
 	
-	private Map<String, String> typeClassMappings;
+	private Map<String, String> typeClassMappings = getDefaultTypeClassMappings();
 	
 	private List<String> basePackages;
 	
-	@Value("${platform.config.secure.regex}")
+	private List<String> basePackagesToExclude;
+	
+	private Map<Scope, List<String>> domainSet;
+	
+	@Value("${nimbus.config.secure.regex:'^[a-zA-Z0-9<>()\\[\\]@/: &.=?,$#_-]{1,1000}'}")
 	private String secureRegex;
 	
 	
@@ -84,13 +89,8 @@ public class DefaultCoreBuilderConfig {
 	}
 	
 	@Bean
-	public ChangeLogCommandEventHandler changeLogCommandEventHandler(BeanResolverStrategy beanResolver) {
-		return new ChangeLogCommandEventHandler(beanResolver);
-	}
-	
-	@Bean
 	public DomainConfigBuilder domainConfigBuilder(EntityConfigBuilder configBuilder){
-		return new DomainConfigBuilder(configBuilder, basePackages);
+		return new DomainConfigBuilder(configBuilder, basePackages, basePackagesToExclude);
 	}
 	
 	@Bean
@@ -133,12 +133,17 @@ public class DefaultCoreBuilderConfig {
 		return new DetourExecutionConfigProvider();
 	}
 	
-	@Bean 
-	public AnnotationConfigHandler annotationConfigHandler(PropertyResolver propertyResolver) {
+	@Bean(name="default.annotationConfigBuilder")
+	public AnnotationConfigHandler annotationConfigHandler(BeanResolverStrategy beanResolver, PropertyResolver propertyResolver) {
 		Map<Class<? extends Annotation>, AnnotationAttributeHandler> attributeHandlers = new HashMap<>();
-		attributeHandlers.put(Constraint.class, new ConstraintAnnotationAttributeHandler());
+		attributeHandlers.put(Constraint.class, new ConstraintAnnotationAttributeHandler(beanResolver));
 		
 		return new DefaultAnnotationConfigHandler(new DefaultAnnotationAttributeHandler(), attributeHandlers, propertyResolver);
+	}
+	
+	@Bean(name="default.eventAnnotationConfigBuilder")
+	public AnnotationConfigHandler eventAnnotationConfigHandler() {
+		return new EventAnnotationConfigHandler();
 	}
 	
 	@Bean
@@ -146,8 +151,11 @@ public class DefaultCoreBuilderConfig {
 		if(typeClassMappings==null) {
 			typeClassMappings = new HashMap<>();
 		}
+		if(domainSet == null) {
+			domainSet = new HashMap<>();
+		}
 		
-		return new DefaultEntityConfigBuilder(beanResolver, typeClassMappings);
+		return new DefaultEntityConfigBuilder(beanResolver, typeClassMappings, domainSet);
 	}
 	
 	@Bean
@@ -168,6 +176,12 @@ public class DefaultCoreBuilderConfig {
 	@Bean
 	public DefaultLoggingInterceptor defaultLoggingHandler() {
 		return new DefaultLoggingInterceptor();
+	}
+	
+	protected Map<String, String> getDefaultTypeClassMappings() {
+		Map<String, String> rv = new HashMap<>();
+		rv.put("java.lang.String", "string");
+		return rv;
 	}
 
 }

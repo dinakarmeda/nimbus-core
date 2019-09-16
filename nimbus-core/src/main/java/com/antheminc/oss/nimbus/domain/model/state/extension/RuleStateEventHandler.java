@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import com.antheminc.oss.nimbus.domain.defn.extension.Rule;
 import com.antheminc.oss.nimbus.domain.model.config.RulesConfig;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.RulesRuntime;
-import com.antheminc.oss.nimbus.domain.model.state.event.StateEventHandlers.OnStateChangeHandler;
-import com.antheminc.oss.nimbus.domain.model.state.event.StateEventHandlers.OnStateLoadHandler;
 import com.antheminc.oss.nimbus.domain.rules.RulesEngineFactory;
 import com.antheminc.oss.nimbus.support.EnableLoggingInterceptor;
 
@@ -41,8 +39,7 @@ import lombok.Getter;
  */
 @EnableLoggingInterceptor
 @Getter(AccessLevel.PROTECTED)
-public class RuleStateEventHandler extends EvalExprWithCrudActions<Rule> 
-		implements OnStateLoadHandler<Rule>, OnStateChangeHandler<Rule> {
+public class RuleStateEventHandler extends EvalExprWithCrudActions<Rule> {
 	
 	private static final Map<String, RulesConfig> rulesConfigCache = new HashMap<>();
 	
@@ -55,7 +52,6 @@ public class RuleStateEventHandler extends EvalExprWithCrudActions<Rule>
 
 	@Override
 	protected void handleInternal(Param<?> onChangeParam, Rule configuredAnnotation) {
-		
 		for(final String ruleAlias: configuredAnnotation.value()) {
 			
 			// Build the rules runtime

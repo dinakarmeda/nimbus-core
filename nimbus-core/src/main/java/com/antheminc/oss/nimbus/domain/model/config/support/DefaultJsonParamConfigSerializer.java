@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import com.antheminc.oss.nimbus.domain.defn.Domain.ListenerType;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,6 +61,9 @@ public class DefaultJsonParamConfigSerializer extends JsonSerializer<ParamConfig
 		
 		
 		try {
+			if(p.containsIgnoreListener(ListenerType.websocket))
+				return;
+			
 			gen.writeStartObject();
 			if(TH_STACK.get().contains(p.getId())) {
 				gen.writeStringField(K_POINTERID, p.getId());

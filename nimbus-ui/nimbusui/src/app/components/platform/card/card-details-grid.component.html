@@ -5,7 +5,15 @@
         <ng-template ngFor let-element [ngForOf]="card?.type?.model?.params">
             <!-- loop thru collection elements -->
             <ng-template [ngIf]="element.config?.uiStyles?.attributes?.alias == componentTypes.cardDetail.toString()">
-                <nm-card-details [element]="element" [position]="!isLabelEmpty ? position+1 : position" [collectionElem]="card.collectionElem" [elemId]="card.elemId" ></nm-card-details>
+                <nm-card-details 
+                    id="{{element.config?.code}}" 
+                    [element]="element" 
+                    [position]="!isLabelEmpty ? position+1 : position" 
+                    [collectionElem]="card.collectionElem" 
+                    [elemId]="card.elemId" 
+                    [nmPrint]="element"
+                    [ngClass]="element.config.uiStyles.attributes.cssClass">
+                </nm-card-details>
             </ng-template>
         </ng-template>
     </ng-template>

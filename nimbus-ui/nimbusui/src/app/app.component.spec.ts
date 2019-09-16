@@ -1,13 +1,13 @@
 /**
  * @license
- * Copyright 2016-2018 the original author or authors.
- * 
+ * Copyright 2016-2019 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 'use strict';
-import { TestBed, async } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing'
+import { Component } from '@angular/core';
+import { async, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { AngularSvgIconModule } from 'angular-svg-icon';
-
+import { configureTestSuite } from 'ng-bullet';
+import { Subscription } from 'rxjs';
 import { AppComponent } from './app.component';
-import { LoaderComponent } from './components/platform/loader/loader.component';
+import { SvgComponent } from './components/platform/svg/svg.component';
 import { LoaderService } from './services/loader.service';
 import { ServiceConstants } from './services/service.constants';
-import { SvgComponent } from './components/platform/svg/svg.component';
-import { SvgDefinitions } from './components/platform/svg/svg-definitions.component'
+import { setup } from './setup.spec';
 
 class MockServiceConstant {
   STOPGAP_APP_HOST: string;
@@ -33,32 +34,35 @@ class MockServiceConstant {
   STOPGAP_APP_PROTOCOL: string;
 }
 
-/**
- * \@author Dinakar.Meda
- * \@author Sandeep.Mantha
- * \@whatItDoes 
- * 
- * \@howToUse 
- * 
- */
+@Component({
+  template: '<div></div>',
+  selector: 'app-loader'
+})
+export class LoaderComponent {
+  show = false;
+  private subscription: Subscription;
+}
+
+const declarations = [AppComponent, LoaderComponent, SvgComponent];
+const imports = [RouterTestingModule, AngularSvgIconModule];
+const providers = [
+  LoaderService,
+  { provide: ServiceConstants, useClass: MockServiceConstant }
+];
+
+let fixture, hostComponent;
+
 describe('AppComponent', () => {
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        AppComponent,
-        LoaderComponent,
-        SvgComponent,
-        SvgDefinitions
-      ],
-      imports: [ RouterTestingModule, AngularSvgIconModule ],
-      providers: [ LoaderService, { provide: ServiceConstants, useClass: MockServiceConstant} ]
-    }).compileComponents();
-  }));
+  configureTestSuite(() => {
+    setup(declarations, imports, providers);
+  });
 
-  it('should create the app', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
-    expect(app).toBeTruthy();
-  }));
+  beforeEach(() => {
+    fixture = TestBed.createComponent(AppComponent);
+    hostComponent = fixture.debugElement.componentInstance;
+  });
 
+  it('should create the AppComponent', async(() => {
+    expect(hostComponent).toBeTruthy();
+  }));
 });

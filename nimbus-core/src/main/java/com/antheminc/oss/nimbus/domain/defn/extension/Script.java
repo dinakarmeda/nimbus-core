@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,21 +15,23 @@
  */
 package com.antheminc.oss.nimbus.domain.defn.extension;
 
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.antheminc.oss.nimbus.domain.defn.event.StateEvent.OnStateLoadNew;
+import com.antheminc.oss.nimbus.domain.Event;
+import com.antheminc.oss.nimbus.domain.defn.event.EventType;
 
 /**
  * @author Soham Chakravarti
  *
  */
 @Retention(RUNTIME)
-@Target(TYPE)
-@OnStateLoadNew
+@Target({TYPE,FIELD})
+@Event
 public @interface Script {
 
 	enum Type {
@@ -42,4 +44,7 @@ public @interface Script {
 	String value() default "";
 	
 	Type type() default Type.SPEL_INLINE;
+	
+	EventType[] eventType() default {EventType.OnStateLoadNew};
+	
 }

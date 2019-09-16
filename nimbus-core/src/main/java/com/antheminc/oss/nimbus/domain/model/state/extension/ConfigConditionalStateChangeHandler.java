@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,9 +28,7 @@ import com.antheminc.oss.nimbus.domain.cmd.exec.ExecutionContext;
 import com.antheminc.oss.nimbus.domain.cmd.exec.ExecutionContextLoader;
 import com.antheminc.oss.nimbus.domain.defn.Execution.Config;
 import com.antheminc.oss.nimbus.domain.defn.extension.ConfigConditional;
-import com.antheminc.oss.nimbus.domain.model.state.ExecutionTxnContext;
-import com.antheminc.oss.nimbus.domain.model.state.ParamEvent;
-import com.antheminc.oss.nimbus.domain.model.state.event.StateEventHandlers.OnStateChangeHandler;
+import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.support.EnableLoggingInterceptor;
 
 import lombok.AccessLevel;
@@ -44,7 +42,7 @@ import lombok.Setter;
 @EnableLoggingInterceptor
 @Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PROTECTED)
-public class ConfigConditionalStateChangeHandler extends AbstractConditionalStateEventHandler implements OnStateChangeHandler<ConfigConditional> {
+public class ConfigConditionalStateChangeHandler extends EvalExprWithCrudActions<ConfigConditional> {
 
 	private CommandExecutorGateway commandGateway;
 	
@@ -54,6 +52,7 @@ public class ConfigConditionalStateChangeHandler extends AbstractConditionalStat
 	
 	public ConfigConditionalStateChangeHandler(BeanResolverStrategy beanResolver) {
 		super(beanResolver);
+		
 	}
 	
 	public void init() {
@@ -65,22 +64,43 @@ public class ConfigConditionalStateChangeHandler extends AbstractConditionalStat
 	}
 	
 	@Override
-	public void onStateChange(ConfigConditional configuredAnnotation, ExecutionTxnContext txnCtx, ParamEvent event) {
+	protected void handleInternal(Param<?> onChangeParam, ConfigConditional configuredAnnotation) {
 		init();
 		
-		boolean isTrue = evalWhen(event.getParam(), configuredAnnotation.when());
+		boolean result = evaluate(configuredAnnotation.when(), onChangeParam);
 		
-		if(!isTrue)
+		if(!result) {
 			return;
+		}
 		
 		Config[] configs = configuredAnnotation.config();
 		if (ArrayUtils.isEmpty(configs)) {
-			throw new InvalidConfigException("No @Config found to execute conditionally on param: " + event.getParam());
+			throw new InvalidConfigException("No @Config found to execute conditionally on param: " + onChangeParam);
 		}
 		
-		Command rootCmd = event.getParam().getRootExecution().getRootCommand();
+		Command rootCmd = onChangeParam.getRootExecution().getRootCommand();
 		ExecutionContext eCtx = getContextLoader().load(rootCmd);
 		
-		getCommandGateway().executeConfig(eCtx, event.getParam(), Arrays.asList(configs));
+		getCommandGateway().executeConfig(eCtx, onChangeParam, Arrays.asList(configs));
 	}
+	
+//	@Override
+//	public void onStateChange(ConfigConditional configuredAnnotation, ExecutionTxnContext txnCtx, ParamEvent event) {
+//		//init();
+//		
+//		boolean isTrue = evalWhen(event.getParam(), configuredAnnotation.when());
+//		
+//		if(!isTrue)
+//			return;
+//		
+//		Config[] configs = configuredAnnotation.config();
+//		if (ArrayUtils.isEmpty(configs)) {
+//			throw new InvalidConfigException("No @Config found to execute conditionally on param: " + event.getParam());
+//		}
+//		
+//		Command rootCmd = event.getParam().getRootExecution().getRootCommand();
+//		ExecutionContext eCtx = getContextLoader().load(rootCmd);
+//		
+//		getCommandGateway().executeConfig(eCtx, event.getParam(), Arrays.asList(configs));
+//	}
 }

@@ -13,20 +13,35 @@
     <app-root></app-root>
     
     <!-- supporting libraries NOT SURE IF THESE ARE NEEDED TODO -->
-	  <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
-    <!-- <script src="node_modules/es6-shim/es6-shim.min.js"></script>
-    <script src="node_modules/zone.js/dist/zone.js"></script>
-    <script src="node_modules/reflect-metadata/Reflect.js"></script>
-    <script src="node_modules/systemjs/dist/system.src.js"></script> -->
+    <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
+    
     <script src="app_scripts.js"></script>
     <script type="text/javascript">
-      /* App Specific Styles - load in the end after loading framework styles */
-      var appStyleLink = document.createElement('link');
-      appStyleLink.rel = 'stylesheet';
-      appStyleLink.href = 'styles/app_styles.css';
-      appStyleLink.type = 'text/css';
-      var linkTag = document.getElementsByTagName('link')[0];
-      linkTag.parentNode.appendChild(appStyleLink);
+      function onReady() {
+        var readyStateCheckInterval = setInterval(function() {
+          if (document && document.readyState === 'complete') { // Or 'interactive'
+            clearInterval(readyStateCheckInterval);
+            loadExternalStyles();
+          }
+        }, 10);
+      }
+      function loadExternalStyles() {
+        /* Brand Specific Styles*/
+        var baseStyleLink = document.createElement('link');
+        baseStyleLink.rel = 'stylesheet';
+        baseStyleLink.href = 'styles/nm_theme.min.css';
+        baseStyleLink.type = 'text/css';
+        var baseLinkTag = document.getElementsByTagName('link')[0];
+        baseLinkTag.parentNode.appendChild(baseStyleLink);
+        /* App Specific Styles - load in the end after loading framework styles */
+        var appStyleLink = document.createElement('link');
+        appStyleLink.rel = 'stylesheet';
+        appStyleLink.href = 'styles/app_styles.css';
+        appStyleLink.type = 'text/css';
+        var linkTag = document.getElementsByTagName('link')[1];
+        linkTag.parentNode.appendChild(appStyleLink);
+      }
+      onReady();
     </script>
   </body>
 </html>

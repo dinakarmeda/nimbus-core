@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,9 +21,16 @@ import java.util.Map;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.antheminc.oss.nimbus.channel.web.ResponseInterceptor;
+import com.antheminc.oss.nimbus.channel.web.HttpRawResponseBodyHeaderInterceptor;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
+import com.antheminc.oss.nimbus.domain.cmd.exec.MultiExecuteOutput;
+import com.antheminc.oss.nimbus.domain.cmd.exec.CommandPathVariableResolver;
 import com.antheminc.oss.nimbus.domain.defn.extension.ValidateConditional.ValidationScope;
+import com.antheminc.oss.nimbus.domain.model.config.extension.GridStateLoadHandler;
 import com.antheminc.oss.nimbus.domain.model.config.extension.LabelStateEventHandler;
+import com.antheminc.oss.nimbus.domain.model.config.extension.ToolTipStateEventHandler;
+import com.antheminc.oss.nimbus.domain.model.config.extension.TreeGridStateLoadHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.AccessConditionalStateEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.ActivateConditionalStateEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.AuditStateChangeHandler;
@@ -38,7 +45,7 @@ import com.antheminc.oss.nimbus.domain.model.state.extension.ModalStateEventHand
 import com.antheminc.oss.nimbus.domain.model.state.extension.ParamContextStateEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.ParamValuesOnLoadHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.RuleStateEventHandler;
-import com.antheminc.oss.nimbus.domain.model.state.extension.ScriptStateLoadNewHandler;
+import com.antheminc.oss.nimbus.domain.model.state.extension.ScriptEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.StaticCodeValueBasedCodeToLabelConverter;
 import com.antheminc.oss.nimbus.domain.model.state.extension.StyleConditionalStateEventHandler;
 import com.antheminc.oss.nimbus.domain.model.state.extension.ValidateConditionalStateEventHandler;
@@ -57,8 +64,18 @@ import com.antheminc.oss.nimbus.domain.model.state.internal.IdParamConverter;
 public class DefaultFrameworkExtensionsConfig {
 	
 	@Bean
-	public LabelStateEventHandler labelConfigEventHandler() {
-		return new LabelStateEventHandler();
+	public LabelStateEventHandler labelConfigEventHandler(CommandPathVariableResolver cmdPathResolver) {
+		return new LabelStateEventHandler(cmdPathResolver);
+	}
+	
+	@Bean
+	public GridStateLoadHandler gridStateLoadHandler(CommandPathVariableResolver cmdPathResolver, LabelStateEventHandler labelStateLoadHandler) {
+		return new GridStateLoadHandler(cmdPathResolver, labelStateLoadHandler);
+	}
+	
+	@Bean
+	public TreeGridStateLoadHandler treeGridStateLoadHandler(CommandPathVariableResolver cmdPathResolver, LabelStateEventHandler labelStateLoadHandler) {
+		return new TreeGridStateLoadHandler(cmdPathResolver, labelStateLoadHandler);
 	}
 	
 	@Bean
@@ -117,6 +134,11 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
+	public ToolTipStateEventHandler extensionToolTipStateEventHandler(CommandPathVariableResolver cmdPathResolver) {
+		return new ToolTipStateEventHandler(cmdPathResolver);
+	}
+	
+	@Bean
 	public StyleConditionalStateEventHandler extensionStyleConditionalStateEventHandler(BeanResolverStrategy beanResolver) {
 		return new StyleConditionalStateEventHandler(beanResolver);
 	}
@@ -145,8 +167,8 @@ public class DefaultFrameworkExtensionsConfig {
 	}
 	
 	@Bean
-	public ScriptStateLoadNewHandler extensionScriptStateLoadNewHandler(BeanResolverStrategy beanResolver) {
-		return new ScriptStateLoadNewHandler(beanResolver);
+	public ScriptEventHandler extensionScriptStateLoadNewHandler(BeanResolverStrategy beanResolver) {
+		return new ScriptEventHandler(beanResolver);
 	}
 	
 	@Bean
@@ -167,6 +189,11 @@ public class DefaultFrameworkExtensionsConfig {
 	@Bean
 	public StaticCodeValueBasedCodeToLabelConverter staticCodeValueBasedCodeToLabelConverter(BeanResolverStrategy beanResolver) {
 		return new StaticCodeValueBasedCodeToLabelConverter(beanResolver);
+	}
+	
+	@Bean(name="default.httpresponsebodyinterceptor._raw")
+	public ResponseInterceptor<MultiExecuteOutput> remoteModelResponseInterceptor(BeanResolverStrategy beanResolver) {
+		return new HttpRawResponseBodyHeaderInterceptor();
 	}
 	
 }

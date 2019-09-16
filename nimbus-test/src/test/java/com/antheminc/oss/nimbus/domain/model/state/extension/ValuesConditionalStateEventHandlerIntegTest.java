@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.QuadModel;
 import com.antheminc.oss.nimbus.entity.AbstractEntity.IdLong;
 import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreEntity;
+import com.antheminc.oss.nimbus.test.scenarios.s0.core.SampleCoreValuesEntity.Status;
 
 /**
  * 
@@ -254,5 +255,42 @@ public class ValuesConditionalStateEventHandlerIntegTest extends AbstractStateEv
 		
 		Assert.assertNull(statusForm.findParamByPath("/statusReason2").getValues());
 		Assert.assertNull(statusForm.findParamByPath("/statusReason2").getState());
+	}
+	
+	@Test
+	public void t11_nonStringState() {
+		final Param<?> statusForm = _q.getRoot().findParamByPath(STATUS_FORM);
+		assertNotNull(statusForm);
+		
+		Assert.assertNotNull(statusForm.findParamByPath("/contactStatus").getValues());
+		Assert.assertNull(statusForm.findParamByPath("/contactStatus").getState());
+		
+		statusForm.findParamByPath("/contactStatus").setState(Status.PAST);
+		
+		statusForm.findParamByPath("/contactType").setState("changeit");
+		Assert.assertEquals(1, statusForm.findParamByPath("/contactStatus").getValues().size());
+		Assert.assertEquals("PAST", statusForm.findParamByPath("/contactStatus").getValues().get(0).getCode());
+		Assert.assertEquals("Past", statusForm.findParamByPath("/contactStatus").getValues().get(0).getLabel());
+		
+		Assert.assertEquals(Status.PAST, statusForm.findParamByPath("/contactStatus").getState());
+	}
+	
+	@Test
+	public void t12_arrayState() {
+		final Param<?> statusForm = _q.getRoot().findParamByPath(STATUS_FORM);
+		assertNotNull(statusForm);
+		
+		Assert.assertNotNull(statusForm.findParamByPath("/contactStatus").getValues());
+		Assert.assertNull(statusForm.findParamByPath("/contactStatus").getState());
+		String[] defaultState = {"FUTURE"};
+		statusForm.findParamByPath("/multiSelect").setState(defaultState);
+		
+		statusForm.findParamByPath("/contactType").setState("changeit");
+		Assert.assertEquals(3, statusForm.findParamByPath("/multiSelect").getValues().size());
+		Assert.assertEquals("FUTURE", statusForm.findParamByPath("/multiSelect").getValues().get(0).getCode());
+		Assert.assertEquals("PAST", statusForm.findParamByPath("/multiSelect").getValues().get(1).getCode());
+		Assert.assertEquals("CURRENT", statusForm.findParamByPath("/multiSelect").getValues().get(2).getCode());
+
+		Assert.assertEquals(defaultState, statusForm.findParamByPath("/multiSelect").getState());
 	}
 }

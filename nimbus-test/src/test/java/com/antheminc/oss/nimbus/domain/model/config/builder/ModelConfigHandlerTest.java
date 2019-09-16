@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.antheminc.oss.nimbus.domain.model.config.ParamConfigType;
 import com.antheminc.oss.nimbus.domain.model.config.builder.internal.DefaultEntityConfigBuilder;
 import com.antheminc.oss.nimbus.entity.person.Address;
 import com.antheminc.oss.nimbus.test.domain.support.AbstractFrameworkIntegrationTests;
+import com.antheminc.oss.nimbus.test.scenarios.repo.remote.core.SampleRemoteRepo;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -139,6 +140,19 @@ public class ModelConfigHandlerTest extends AbstractFrameworkIntegrationTests {
 		
 		ModelConfig<?> nmNested = ((ParamConfigType.Nested)p.getType()).getModelConfig();
 		Assert.assertNotNull(nmNested);
+	}
+	
+	@Test
+	public void test_remote_true() {
+		ModelConfig<SampleRemoteRepo> remote_config = this.handler.load(SampleRemoteRepo.class, new EntityConfigVisitor());
+		Assert.assertNotNull(remote_config);
+		Assert.assertTrue(remote_config.isRemote());
+	}
+	
+	@Test
+	public void test_remote_false() {
+		Assert.assertNotNull(this.mConfig);
+		Assert.assertFalse(this.mConfig.isRemote());
 	}
 	
 }

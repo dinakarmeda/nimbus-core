@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -128,10 +128,10 @@ public class DefaultActionExecutorUpdate extends AbstractCommandExecutor<Boolean
 		Param<Object> p = findParamByCommandOrThrowEx(eCtx);
 		String json = eCtx.getCommandMessage().getRawPayload();
 
-		if (p.isLeaf()) {
-			handleLeaf(p, json);
-		} else if (p.isCollection()) {
+		if (p.isCollection()) {
 			handleCollection(p.findIfCollection(), json);
+		} else if (p.isLeaf()) {
+			handleLeaf(p, json);
 		} else {
 			// remaining scenarios apply to nested params or collection elements
 			handleParam(p, json);

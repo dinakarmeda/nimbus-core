@@ -1,191 +1,318 @@
+/**
+ * @license
+ * Copyright 2016-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 'use strict';
-import { TestBed, async } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { DropdownModule } from 'primeng/primeng';
+
+import {
+  HashLocationStrategy,
+  Location,
+  LocationStrategy
+} from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { Component, Input, ViewChild } from '@angular/core';
+import { async, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-
-import { CardDetailsFieldComponent } from './card-details-field.component';
-import { InPlaceEditorComponent } from '../form/elements/inplace-editor.component';
-import { InputText } from '../form/elements/textbox.component';
-import { TextArea } from '../form/elements/textarea.component';
-import { ComboBox } from '../form/elements/combobox.component';
-import { DateTimeFormatPipe } from '../../../pipes/date.pipe';
-import { TooltipComponent } from '../tooltip/tooltip.component';
-import { SelectItemPipe } from '../../../pipes/select-item.pipe';
-import { CustomHttpClient } from '../../../services/httpclient.service';
+import { By } from '@angular/platform-browser';
+import {
+  SESSION_STORAGE,
+  StorageServiceModule
+} from 'angular-webstorage-service';
+import { JL } from 'jsnlog';
+import {
+  cardDetailsFieldInputLabel,
+  cardDetailsFieldInputLabelNoDate,
+  cardDetailsFieldNmDisplayValueParam,
+  cardDetailsFieldParam
+} from 'mockdata';
+import { configureTestSuite } from 'ng-bullet';
+import { DropdownModule, TooltipModule } from 'primeng/primeng';
 import { DisplayValueDirective } from '../../../directives/display-value.directive';
+import { DateTimeFormatPipe } from '../../../pipes/date.pipe';
+import { SelectItemPipe } from '../../../pipes/select-item.pipe';
+import { AppInitService } from '../../../services/app.init.service';
+import { CustomHttpClient } from '../../../services/httpclient.service';
+import { LoggerService } from '../../../services/logger.service';
+import { setup } from '../../../setup.spec';
+import { Values } from '../../../shared/param-state';
 import { InputLabel } from '../../platform/form/elements/input-label.component';
+import { ComboBox } from '../form/elements/combobox.component';
+import { TextArea } from '../form/elements/textarea.component';
+import { InputText } from '../form/elements/textbox.component';
+import { TooltipComponent } from '../tooltip/tooltip.component';
+import { ConfigService } from './../../../services/config.service';
+import { LoaderService } from './../../../services/loader.service';
+import { PageService } from './../../../services/page.service';
+import {
+  CUSTOM_STORAGE,
+  SessionStoreService
+} from './../../../services/session.store';
+import { NmMessageService } from './../../../services/toastmessage.service';
+import { CardDetailsFieldComponent } from './card-details-field.component';
 
-let fixture, app;
+@Component({
+  template: '<div></div>',
+  selector: 'inplace-editor'
+})
+class InPlaceEditorComponent {
+  public editClass: string;
+  public label: string;
+  public UNASSIGNVALUE = 'Unassigned';
+  public displayValue = '';
+  private _value = '';
+  private preValue = '';
+
+  private componentRef: any;
+  @ViewChild('container')
+  private container: any;
+  private inputInstance: any;
+  @Input() element: any;
+}
+
+const declarations = [
+  CardDetailsFieldComponent,
+  InPlaceEditorComponent,
+  InputText,
+  TextArea,
+  ComboBox,
+  DateTimeFormatPipe,
+  TooltipComponent,
+  SelectItemPipe,
+  DisplayValueDirective,
+  InputLabel
+];
+const imports = [
+  FormsModule,
+  DropdownModule,
+  TooltipModule,
+  HttpClientModule,
+  HttpModule,
+  StorageServiceModule
+];
+const providers = [
+  { provide: CUSTOM_STORAGE, useExisting: SESSION_STORAGE },
+  { provide: 'JSNLOG', useValue: JL },
+  { provide: LocationStrategy, useClass: HashLocationStrategy },
+  Location,
+  SessionStoreService,
+  CustomHttpClient,
+  PageService,
+  NmMessageService,
+  LoaderService,
+  ConfigService,
+  LoggerService,
+  AppInitService
+];
+let fixture, hostComponent;
 
 describe('CardDetailsFieldComponent', () => {
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        CardDetailsFieldComponent,
-        InPlaceEditorComponent,
-        InputText,
-        TextArea,
-        ComboBox,
-        DateTimeFormatPipe,
-        TooltipComponent,
-        SelectItemPipe,
-        DisplayValueDirective,
-        InputLabel
-      ],
-      imports: [FormsModule, DropdownModule, HttpClientModule, HttpModule],
-      providers: [CustomHttpClient]
-    }).compileComponents();
+  configureTestSuite(() => {
+    setup(declarations, imports, providers);
+  });
+
+  beforeEach(() => {
     fixture = TestBed.createComponent(CardDetailsFieldComponent);
-    app = fixture.debugElement.componentInstance;
+    hostComponent = fixture.debugElement.componentInstance;
+    hostComponent.element = cardDetailsFieldParam;
+  });
+
+  it('should create the CardDetailsFieldComponent', async(() => {
+    expect(hostComponent).toBeTruthy();
   }));
 
-    it('should create the app', async(() => {
-      expect(app).toBeTruthy();
-    }));
+  it('inplaceEditor should be created', async(() => {
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const inplaceEditorEle = debugElement.query(By.css('inplace-editor'));
+    expect(inplaceEditorEle.name).toEqual('inplace-editor');
+  }));
 
-    it('ngOnInit() should update fieldClass property for cols:6', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '6' } } } };
-      app.ngOnInit();
-      expect(app.fieldClass).toEqual('col-sm-3');
-    }));
+  it('inplaceEditor should not be created', async(() => {
+    hostComponent.element.config.uiStyles.attributes.inplaceEdit = false;
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const inplaceEditor = debugElement.query(By.css('inplace-editor'));
+    expect(inplaceEditor).toBeFalsy();
+  }));
 
-    it('ngOnInit() should update fieldClass property for cols:4', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '4' } } } };
-      app.ngOnInit();
-      expect(app.fieldClass).toEqual('col-sm-3');
-    }));
+  it('inplaceEditor should not be created when imgSrc is available', async(() => {
+    hostComponent.element.config.uiStyles.attributes.imgSrc = 't';
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const inplaceEditorEle = debugElement.query(By.css('inplace-editor'));
+    expect(inplaceEditorEle).toBeFalsy();
+  }));
 
-    it('ngOnInit() should update fieldClass property for cols:3', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '3' } } } };
-      app.ngOnInit();
-      expect(app.fieldClass).toEqual('col-sm-3');
-    }));
+  it('inputLabel should be created', async(() => {
+    const iLabel = cardDetailsFieldInputLabel;
+    hostComponent.element = iLabel;
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const inputLabelEle = debugElement.query(By.css('nm-input-label'));
+    expect(inputLabelEle.name).toEqual('nm-input-label');
+  }));
 
-    it('ngOnInit() should update fieldClass property for cols:2', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '2' } } } };
-      app.ngOnInit();
-      expect(app.fieldClass).toEqual('col-sm-3');
-    }));
+  it('inputLabel should not be created when element.config.uiStyles.attributes.showName', async(() => {
+    const iLabel = cardDetailsFieldInputLabel;
+    hostComponent.element = iLabel;
+    hostComponent.element.config.uiStyles.attributes.showName = false;
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const inputLabelEle = debugElement.query(By.css('nm-input-label'));
+    expect(inputLabelEle).toBeFalsy();
+  }));
 
-    it('ngOnInit() should update fieldClass property for cols:1', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '1' } } } };
-      app.ngOnInit();
-      expect(app.fieldClass).toEqual('col-sm-3');
-    }));
+  it('inputLabel should be created with out date', async(() => {
+    const iLabel = cardDetailsFieldInputLabelNoDate;
+    hostComponent.element = iLabel;
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const inputLabelEle = debugElement.query(By.css('nm-input-label'));
+    expect(inputLabelEle.name).toEqual('nm-input-label');
+  }));
 
-    it('value property should be updated with element.leafstate', async(() => {
-      app.element = { leafState: 'test', values: [] };
-      app.value = '';
-      expect(app.value).toEqual('test');
-    }));
+  it('inputLabel should not be created with out date', async(() => {
+    const iLabel = cardDetailsFieldInputLabelNoDate;
+    hostComponent.element = iLabel;
+    hostComponent.element.config.uiStyles.attributes.showName = false;
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const inputLabelEle = debugElement.query(By.css('nm-input-label'));
+    expect(inputLabelEle).toBeFalsy();
+  }));
 
-    it('value property should be updated with element.values.label', async(() => {
-      app.element = { leafState: 'test', values: [{ code: 'test', label: 'tLabel' }] };
-      app.value = '';
-      expect(app.value).toEqual('tLabel');
-    }));
+  it('ngOnInit() should update fieldClass property for cols:6', async(() => {
+    fixture.whenStable().then(() => {
+      hostComponent.element.config.uiStyles.attributes.cols = '6';
+      hostComponent.ngOnInit();
+      expect((hostComponent as any).fieldClass).toEqual('col-sm-3');
+    });
+  }));
 
-    it('value property should be updated with element.leafstate based on code', async(() => {
-      app.element = { leafState: 'test', values: [{ code: 'test1', label: 'tLabel' }] };
-      app.value = '';
-      expect(app.value).toEqual('test');
-    }));
+  it('ngOnInit() should update fieldClass property for cols:4', async(() => {
+    fixture.whenStable().then(() => {
+      hostComponent.element.config.uiStyles.attributes.cols = '4';
+      hostComponent.ngOnInit();
+      expect((hostComponent as any).fieldClass).toEqual('col-sm-3');
+    });
+  }));
 
-    it('registerOnChange() should update the onChange property', async(() => {
-      const test = () => {
-        return true;
-      };
-      app.registerOnChange(test);
-      expect(app.onChange).toEqual(test);
-    }));
+  it('ngOnInit() should update fieldClass property for cols:3', async(() => {
+    fixture.whenStable().then(() => {
+      hostComponent.element.config.uiStyles.attributes.cols = '3';
+      hostComponent.ngOnInit();
+      expect((hostComponent as any).fieldClass).toEqual('col-sm-3');
+    });
+  }));
 
-    it('writeValue() shouls call asdasd', async(() => {
-      app.element = { leafState: 'test', values: [] };
-      spyOn(app, 'onChange').and.callThrough();
-      app.writeValue(123);
-      app.writeValue();
-      expect(app.onChange).toHaveBeenCalled();
-    }));
+  it('ngOnInit() should update fieldClass property for cols:2', async(() => {
+    fixture.whenStable().then(() => {
+      hostComponent.element.config.uiStyles.attributes.cols = '2';
+      hostComponent.ngOnInit();
+      expect((hostComponent as any).fieldClass).toEqual('col-sm-3');
+    });
+  }));
 
-    it('registerOnTouched() should update the onTouched property', async(() => {
-      const test = () => {
-        return true;
-      };
-      app.registerOnTouched(test);
-      expect(app.onTouched).toEqual(test);
-    }));
+  it('ngOnInit() should update fieldClass property for cols:1', async(() => {
+    fixture.whenStable().then(() => {
+      hostComponent.element.config.uiStyles.attributes.cols = '1';
+      hostComponent.ngOnInit();
+      expect((hostComponent as any).fieldClass).toEqual('col-sm-3');
+    });
+  }));
 
-    it('getComponentClass() should return array [testClass, col-sm-12, p-0, clearfix]', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '1', cssClass: 'testClass' } } } };
-      expect(app.getComponentClass()).toEqual([
-        'testClass',
-        'p-0',
-        'clearfix',
-        'col-sm-12'
-      ]);
-    }));
+  it('value property should be updated with element.leafstate', async(() => {
+    hostComponent.element.leafState = 'test';
+    hostComponent.element.values = [];
+    hostComponent.value = '';
+    expect(hostComponent.value).toEqual('test');
+  }));
 
-    it('getComponentClass() should return array [testClass, col-sm-6, p-0, clearfix]', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '2', cssClass: 'testClass' } } } };
-      expect(app.getComponentClass()).toEqual([
-        'testClass',
-        'p-0',
-        'clearfix',
-        'col-sm-6'
-      ]);
-    }));
+  it('value property should be updated with element.values.label', async(() => {
+    hostComponent.element.leafState = 'test';
+    const testValue = new Values();
+    testValue.code = 'test';
+    testValue.label = 'tLabel';
+    hostComponent.element.values = [testValue];
+    hostComponent.value = '';
+    expect(hostComponent.value).toEqual('tLabel');
+  }));
 
-    it('getComponentClass() should return array [testClass, col-sm-4, p-0, clearfix]', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '3', cssClass: 'testClass' } } } };
-      expect(app.getComponentClass()).toEqual([
-        'testClass',
-        'p-0',
-        'clearfix',
-        'col-sm-4'
-      ]);
-    }));
+  it('value property should be updated with element.leafstate based on code', async(() => {
+    hostComponent.element.leafState = 'test';
+    const testValue = new Values();
+    testValue.code = 'test1';
+    testValue.label = 'tLabel';
+    hostComponent.element.values = [testValue];
+    hostComponent.value = '';
+    expect(hostComponent.value).toEqual('test');
+  }));
 
-    it('getComponentClass() should return array [testClass, col-sm-3, p-0, clearfix]', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '4', cssClass: 'testClass' } } } };
-      expect(app.getComponentClass()).toEqual([
-        'testClass',
-        'p-0',
-        'clearfix',
-        'col-sm-3'
-      ]);
-    }));
+  it('registerOnChange() should update the onChange property', async(() => {
+    const test = () => {
+      return true;
+    };
+    hostComponent.registerOnChange(test);
+    expect(hostComponent.onChange).toEqual(test);
+  }));
 
-    it('getComponentClass() should return array [testClass, col-sm-2, p-0, clearfix]', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '6', cssClass: 'testClass' } } } };
-      expect(app.getComponentClass()).toEqual([
-        'testClass',
-        'p-0',
-        'clearfix',
-        'col-sm-2'
-      ]);
-    }));
+  it('writeValue() shouls call onChange()', async(() => {
+    hostComponent.element.leafState = 'test';
+    hostComponent.element.values = [];
+    spyOn(hostComponent, 'onChange').and.callThrough();
+    hostComponent.writeValue(123);
+    hostComponent.writeValue(undefined);
+    expect(hostComponent.onChange).toHaveBeenCalled();
+  }));
 
-    it('getComponentClass() should return array [testClass, col-sm-3, p-0, clearfix] when cols is empty', async(() => {
-      app.element = { config: { uiStyles: { attributes: { cols: '', cssClass: 'testClass' } } } };
-      expect(app.getComponentClass()).toEqual([
-        'testClass',
-        'p-0',
-        'clearfix',
-        'col-sm-3'
-      ]);
-    }));
+  it('registerOnTouched() should update the onTouched property', async(() => {
+    const test = () => {
+      return true;
+    };
+    hostComponent.registerOnTouched(test);
+    expect(hostComponent.onTouched).toEqual(test);
+  }));
 
-    it('value getter() should return _value property value', async(() => {
-      app._value = 'test';
-      expect(app.value).toEqual('test');
-    }));
+  it('value getter() should return _value property value', async(() => {
+    hostComponent.value = 'test';
+    expect(hostComponent._value).toEqual('test');
+  }));
 
-    it('set value() should update the app.value property', async(() => {
-      app.element = { leafState: 'test', values: [{ code: 'test' }] };
-      app.value = '';
-      expect(app.value).toEqual('test');
-    }));
+  it('set value() should update the value property', async(() => {
+    hostComponent.element.leafState = 'test';
+    const testValue = new Values();
+    testValue.code = 'test1';
+    hostComponent.element.values = [testValue];
+    hostComponent.value = '';
+    expect(hostComponent.value).toEqual('test');
+  }));
 
+  it('nmDisplayValue should add leafstate and config.code as class', async(() => {
+    hostComponent.element = cardDetailsFieldNmDisplayValueParam;
+    fixture.detectChanges();
+    const debugElement = fixture.debugElement;
+    const divNmDisplayValueDivEle = debugElement.query(
+      By.css('.textWrapBreakWord')
+    );
+    expect(divNmDisplayValueDivEle.nativeElement.classList[1]).toEqual(
+      hostComponent.element.leafState
+    );
+    expect(divNmDisplayValueDivEle.nativeElement.classList[2]).toEqual(
+      hostComponent.element.config.code
+    );
+  }));
 });

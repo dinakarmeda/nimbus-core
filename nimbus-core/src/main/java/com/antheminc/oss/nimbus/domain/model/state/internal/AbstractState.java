@@ -1,5 +1,5 @@
 /**
- *  Copyright 2016-2018 the original author or authors.
+ *  Copyright 2016-2019 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -32,60 +32,6 @@ import lombok.ToString;
 @Getter @RequiredArgsConstructor @ToString
 public abstract class AbstractState<T> extends Observable implements State<T> {
 
-//	@JsonIgnore final private StateAndConfig<?, ?> parent;
-	
-//	@JsonIgnore @Setter(AccessLevel.PROTECTED) private transient Supplier<T> getter;
-//	
-//	@JsonIgnore @Setter(AccessLevel.PROTECTED) private transient Consumer<T> setter;
-
-	@JsonIgnore private transient final EntityStateAspectHandlers provider;
-
-//	@Override
-//	public T getState() {
-//		return getGetter().get();
-//	}
-	
-//	/**
-//	 * 
-//	 * @param newState
-//	 * @return
-//	 */
-//    protected Action setStateInternal(T newState) {
-//		T oldState = getState();
-//		
-//		//00
-//		if(oldState == null && newState == null) return null;
-//		
-//		//01
-//		else if(oldState == null && newState != null) {
-//			return Action._new;
-//		}
-//		
-//		//10
-//		else if(oldState != null && newState == null) {
-//			return Action._delete;
-//		}
-//				
-//		//11
-//		else if(oldState != null && newState != null) {
-//			if(oldState.equals(newState)) return null;
-//			return Action._replace;
-//		}
-//		
-//		throw new IllegalStateException("Illogical section of code reached while setting newState: "+ newState);
-//	}
-	
-	/**
-     * 
-     * @param newState
-     */
-    protected void setStateAndNotifyObservers(T newState) {
-    	//getSetter().accept(newState);
-    	setState(newState);
-    	
-    	setChanged();
-    	notifyObservers(newState);
-    }
-	
-
+	@JsonIgnore
+	private transient final EntityStateAspectHandlers provider;
 }
