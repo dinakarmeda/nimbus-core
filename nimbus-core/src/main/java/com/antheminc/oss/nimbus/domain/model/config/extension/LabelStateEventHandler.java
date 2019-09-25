@@ -19,8 +19,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandPathVariableResolver;
@@ -115,7 +115,7 @@ public class LabelStateEventHandler extends AbstractConfigEventHandler implement
 	protected void validateAndAdd(LabelState labelState, Param<?> targetParam, Param<?> contextParam) {
 
 		// duplicate check the previous label assigned.
-		if (CollectionUtils.isNotEmpty(targetParam.getLabels())) {
+		if (!CollectionUtils.isEmpty(targetParam.getLabels())) {
 			if (targetParam.getLabels().stream().anyMatch(l -> l.getLocale().equals(labelState.getLocale()))) {
 				return;
 			}

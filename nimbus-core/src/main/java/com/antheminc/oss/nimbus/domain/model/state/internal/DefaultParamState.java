@@ -28,11 +28,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidConfigException;
@@ -819,7 +819,7 @@ public class DefaultParamState<T> extends AbstractEntityState<T> implements Para
 		
 		/*	check for multiple labels with same locale, 
 			when setLabels in invoked manually instead of using @Label annotation */
-		if(CollectionUtils.isNotEmpty(labelstate)) { 
+		if(!CollectionUtils.isEmpty(labelstate)) { 
 			Set<LabelState> other = new HashSet<>(labelstate);	
 			labelstate.stream().forEach(ls1 -> {
 				other.stream().filter(ls2 -> (StringUtils.equalsIgnoreCase(ls1.getLocale(), ls2.getLocale()) 

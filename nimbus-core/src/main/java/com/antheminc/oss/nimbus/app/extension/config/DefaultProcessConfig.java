@@ -110,11 +110,6 @@ public class DefaultProcessConfig {
 		return new StatelessBPMFunctionHanlder<>(beanResolver);
 	}	
 	
-	@Bean(name="expressionEvaluator")
-	public ExpressionEvaluator expressionEvaluator(BeanResolverStrategy beanResolver){
-		return new SpelExpressionEvaluator();
-	}	
-	
 	@Bean(name="commandExecutorTaskDelegate")
 	public CommandExecutorTaskDelegate commandExecutorTaskDelegate(BeanResolverStrategy beanResolver){
 		return new CommandExecutorTaskDelegate(beanResolver);

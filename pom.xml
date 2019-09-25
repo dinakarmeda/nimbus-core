@@ -11,9 +11,9 @@
 	<properties>
 		<java.version>1.8</java.version>
 	
-	    <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
-    	<spring.cloud.version>Finchley.RELEASE</spring.cloud.version>
-		<spring.boot.maven.version>2.0.5.RELEASE</spring.boot.maven.version>
+	    <spring.boot.version>2.1.7.RELEASE</spring.boot.version>
+    	<spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
+		<spring.boot.maven.version>2.1.7.RELEASE</spring.boot.maven.version>
 	
 		<sonar.projectName>Nimbus Framework</sonar.projectName>
 		<sonar.cpd.exclusions>src/main/java/com/antheminc/oss/nimbus/domain/defn/extension/*Conditional.java, **/ViewConfig.java, src/main/java/com/antheminc/oss/nimbus/test/scenarios/**/VR*.java</sonar.cpd.exclusions>
@@ -31,12 +31,12 @@
         
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <swagger.version>2.4.0</swagger.version>
+        <swagger.version>2.9.2</swagger.version>
         
         <commons-io.version>2.4</commons-io.version>
         <drools.version>5.6.0.Final</drools.version>
         <commons-lang.version>3.7</commons-lang.version>
-        <activiti-spring-boot.version>7.0.0.Beta1</activiti-spring-boot.version>
+        <activiti-spring-boot.version>7.1.0.M1</activiti-spring-boot.version>
         <apache-dir-server.version>1.5.5</apache-dir-server.version>
         <jackson-mapper-asl.version>1.9.6</jackson-mapper-asl.version>
         <quartz.version>2.2.3</quartz.version>
@@ -66,7 +66,7 @@
         <npm.version>6.4.1</npm.version>
         <frontend.plugin.version>1.6</frontend.plugin.version>
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
-        <owasp-esapi.version>2.1.0.1</owasp-esapi.version>
+        <owasp-esapi.version>2.2.0.0</owasp-esapi.version>
         <owasp-antisamy.version>1.5.7</owasp-antisamy.version>
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
         <sonar.maven.plugin.version>3.5.0.1254</sonar.maven.plugin.version>
@@ -195,7 +195,12 @@
                 <version>${embed-mongo.version}</version>
                 <scope>test</scope>
             </dependency>
-            	<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
+            <dependency>
+            	<groupId>com.fasterxml.jackson.core</groupId>
+			    <artifactId>jackson-databind</artifactId>
+			    <version>2.9.9.3</version>
+			</dependency>
+            <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
 			<dependency>
 		    		<groupId>com.fasterxml.jackson.datatype</groupId>
 		    		<artifactId>jackson-datatype-jsr310</artifactId>
@@ -349,15 +354,21 @@
     </dependencyManagement>
 
     <dependencies>
-    		<dependency>
-    			<groupId>org.springframework.boot</groupId>
-    			<artifactId>spring-boot-starter-aop</artifactId>
-    		</dependency>
-    		<dependency>
-       	 	<groupId>org.springframework.cloud</groupId>
-        		<artifactId>spring-cloud-starter-config</artifactId>
-    		</dependency>
-    		<dependency>
+   		<dependency>
+   			<groupId>org.springframework.boot</groupId>
+   			<artifactId>spring-boot-starter-aop</artifactId>
+   		</dependency>
+   		<dependency>
+      	 	<groupId>org.springframework.cloud</groupId>
+       		<artifactId>spring-cloud-starter-config</artifactId>
+       		<exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+					<artifactId>spring-security-crypto</artifactId>
+                </exclusion>
+           	</exclusions>
+   		</dependency>
+   		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
@@ -370,10 +381,20 @@
         	<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-starter-web</artifactId>
     	</dependency>
-       	<dependency>
+    	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-groovy-templates</artifactId>
+		</dependency>
+    	<dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy-jsr223</artifactId>
         </dependency>
+       	<dependency>
+		    <groupId>org.codehaus.groovy</groupId>
+		    <artifactId>groovy-all</artifactId>
+		    <version>2.5.7</version>
+		    <type>pom</type>
+		</dependency>
         <dependency>
             <groupId>org.eclipse.jdt.core.compiler</groupId>
             <artifactId>ecj</artifactId>
@@ -382,10 +403,10 @@
             <groupId>org.drools</groupId>
             <artifactId>drools-core</artifactId>
         </dependency>
-         <dependency>
-    			<groupId>org.drools</groupId>
-    			<artifactId>drools-decisiontables</artifactId>
-			</dependency>
+        <dependency>
+    		<groupId>org.drools</groupId>
+    		<artifactId>drools-decisiontables</artifactId>
+		</dependency>
         <dependency>
             <groupId>org.drools</groupId>
             <artifactId>drools-compiler</artifactId>
@@ -403,15 +424,18 @@
          <dependency>
              <groupId>org.activiti</groupId>
              <artifactId>activiti-spring-boot-starter</artifactId>
-             <version>${activiti-spring-boot.version}</version>
          </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>            
-    	<dependency>
-    			<groupId>org.apache.commons</groupId>
-    			<artifactId>commons-dbcp2</artifactId>
+		</dependency> 
+		<dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+        </dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-dbcp2</artifactId>
 		</dependency>
 		<dependency>
             <groupId>org.springframework.data</groupId>
@@ -504,10 +528,6 @@
 		<dependency>
 			<groupId>org.owasp.esapi</groupId>
     		<artifactId>esapi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 		<dependency>
 		<groupId>org.apache.poi</groupId>

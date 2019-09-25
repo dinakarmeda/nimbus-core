@@ -29,11 +29,11 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidArgumentException;
@@ -222,7 +222,7 @@ public class DefaultCommandExecutorGateway extends BaseCommandExecutorStrategies
 		Param<?> cmdParam = findParamByCommandOrThrowEx(eCtx);
 		ExecutionConfig executionConfig = cmdParam != null ? cmdParam.getConfig().getExecutionConfig() : null;
 		
-		if(cmdMsg.getCommand().getAction() == Action._get && executionConfig != null && CollectionUtils.isNotEmpty(executionConfig.get())) {
+		if(cmdMsg.getCommand().getAction() == Action._get && executionConfig != null && !CollectionUtils.isEmpty(executionConfig.get())) {
                List<MultiOutput> execConfigOutputs = executeConfig(eCtx, cmdParam, executionConfig.get());
                execConfigOutputs.stream().forEach(mOut->addMultiOutput(mOutput, mOut));
         }

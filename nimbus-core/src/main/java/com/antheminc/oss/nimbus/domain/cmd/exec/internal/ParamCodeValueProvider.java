@@ -15,29 +15,23 @@
  */
 package com.antheminc.oss.nimbus.domain.cmd.exec.internal;
 
-import java.beans.PropertyDescriptor;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.CollectionUtils;
 
-import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.domain.cmd.CommandElement.Type;
 import com.antheminc.oss.nimbus.domain.cmd.CommandMessage;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.Input;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.Output;
-import com.antheminc.oss.nimbus.domain.defn.Constants;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecutor;
+import com.antheminc.oss.nimbus.domain.defn.Constants;
 import com.antheminc.oss.nimbus.domain.model.config.ParamValue;
 import com.antheminc.oss.nimbus.domain.model.state.HierarchyMatch;
-import com.antheminc.oss.nimbus.entity.AbstractEntity;
 import com.antheminc.oss.nimbus.entity.StaticCodeValue;
 
 import lombok.Getter;
@@ -92,7 +86,7 @@ public class ParamCodeValueProvider implements HierarchyMatch, CommandExecutor<L
 		CommandMessage cmdMsg = input.getContext().getCommandMessage();
 		
 		// 1.1 config server lookup
-		if(MapUtils.isNotEmpty(values) && CollectionUtils.isNotEmpty(values.get(cmdMsg.getRawPayload()))){
+		if(MapUtils.isNotEmpty(values) && !CollectionUtils.isEmpty(values.get(cmdMsg.getRawPayload()))){
 			return values.get(cmdMsg.getRawPayload());
 		}
 		
@@ -102,7 +96,7 @@ public class ParamCodeValueProvider implements HierarchyMatch, CommandExecutor<L
 		if(CollectionUtils.isEmpty(modelList))
 			return null;
 		
-		if(CollectionUtils.size(modelList) > 1)
+		if(!CollectionUtils.isEmpty(modelList) && modelList.size() > 1)
 			throw new IllegalStateException("StaticCodeValue look up for a command message"+cmdMsg+" returned more than one records for paramCode");
 		
 		return modelList.get(0).getParamValues();
@@ -114,7 +108,7 @@ public class ParamCodeValueProvider implements HierarchyMatch, CommandExecutor<L
 		
 		// 2.1 config server lookup
 		String domainAlias = cmdMsg.getCommand().getRootDomainAlias();
-		if(MapUtils.isNotEmpty(values) && CollectionUtils.isNotEmpty(values.get(domainAlias))) {
+		if(MapUtils.isNotEmpty(values) && !CollectionUtils.isEmpty(values.get(domainAlias))) {
 			return (R)values.get(domainAlias);
 		}
 		

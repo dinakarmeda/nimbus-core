@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandPathVariableResolver;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;
@@ -52,7 +52,7 @@ public class TableBasedStateLoadEventHandler<T extends Annotation> extends Abstr
 
 		if (!p.isLeaf()) {
 			for (ParamConfig<?> colElemParamConfig : p.getType().findIfNested().getModelConfig().getParamConfigs()) {
-				if (CollectionUtils.isNotEmpty(colElemParamConfig.getLabels())) {
+				if (!CollectionUtils.isEmpty(colElemParamConfig.getLabels())) {
 					Set<LabelState> listParamLabels = new HashSet<>();
 					colElemParamConfig.getLabels()
 							.forEach((label) -> listParamLabels.add(getLabelStateLoadHandler().convert(label, param)));

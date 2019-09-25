@@ -25,12 +25,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
@@ -145,7 +145,7 @@ public class DefaultEntityConfigBuilder extends AbstractEntityConfigBuilder impl
 			mConfig.setRemote(true);
 		} 
 		//TODO : Add logic for checking local domainset
-		if(CollectionUtils.isNotEmpty(domainSet.get(Scope.LOCAL))) {
+		if(!CollectionUtils.isEmpty(domainSet.get(Scope.LOCAL))) {
 			throw new UnsupportedOperationException("Local scope is not supported for domainset configuration. Consider using only domain.model.domainSet.remote property instead");
 		}
 		return mConfig;
@@ -160,7 +160,7 @@ public class DefaultEntityConfigBuilder extends AbstractEntityConfigBuilder impl
 			.filter(e->AnnotatedElementUtils.isAnnotated(e.getKey(), RefId.class))
 			.collect(Collectors.toList());
 		
-		if(CollectionUtils.isNotEmpty(refIdEntries)) {
+		if(!CollectionUtils.isEmpty(refIdEntries)) {
 			
 			if(refIdEntries.size()!=1)
 				throw new InvalidConfigException("Expected to find only 1 declaration of @RefId, "

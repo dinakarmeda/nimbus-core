@@ -52,11 +52,11 @@ import com.antheminc.oss.nimbus.support.expr.SpelExpressionEvaluator;
 @Configuration
 public class DefaultCoreExecutorConfig {
 	
-	@Bean
-	public ExpressionEvaluator expressionEvaluator() {
+	@Bean(name="expressionEvaluator")
+	public ExpressionEvaluator expressionEvaluator(BeanResolverStrategy beanResolver){
 		return new SpelExpressionEvaluator();
-	}
-	
+	}	
+		
 	@Bean
 	public CommandMessageConverter commandMessageConverter(BeanResolverStrategy beanResolver) {
 		return new CommandMessageConverter(beanResolver);

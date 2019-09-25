@@ -23,12 +23,12 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.persistence.deploy.Deployer;
-import org.activiti.runtime.api.identity.UserGroupManager;
 import org.activiti.spring.SpringAsyncExecutor;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.AbstractProcessEngineAutoConfiguration;
@@ -119,8 +119,15 @@ public class BPMEngineConfig extends AbstractProcessEngineAutoConfiguration {
 			PlatformTransactionManager jpaTransactionManager, SpringAsyncExecutor springAsyncExecutor,
 			BeanResolverStrategy beanResolver, UserGroupManager userGroupManager) throws Exception {
 		
-		SpringProcessEngineConfiguration engineConfiguration = this
-				.baseSpringProcessEngineConfiguration(processDataSource, jpaTransactionManager, springAsyncExecutor,userGroupManager);
+//		SpringProcessEngineConfiguration engineConfiguration = this
+//				.baseSpringProcessEngineConfiguration(processDataSource, jpaTransactionManager, springAsyncExecutor,userGroupManager);
+
+		SpringProcessEngineConfiguration engineConfiguration = new SpringProcessEngineConfiguration();
+		engineConfiguration.setTransactionManager(jpaTransactionManager);
+		engineConfiguration.setDataSource(processDataSource);
+		engineConfiguration.setAsyncExecutor(springAsyncExecutor);
+		engineConfiguration.setUserGroupManager(userGroupManager);
+		engineConfiguration.setDatabaseSchemaUpdate("true");
 
 		if (deploymentName.isPresent()) {
 			engineConfiguration.setDeploymentName(deploymentName.get());

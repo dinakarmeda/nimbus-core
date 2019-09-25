@@ -19,11 +19,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.InvalidConfigException;
@@ -112,7 +111,7 @@ public class DefaultSearchFunctionHandlerLookup<T, R> extends DefaultSearchFunct
 		if(CollectionUtils.isEmpty(searchResult))
 			return null;
 		
-		if(CollectionUtils.size(searchResult) > 1)
+		if(!CollectionUtils.isEmpty(searchResult) && searchResult.size() > 1)
 			throw new FrameworkRuntimeException("StaticCodeValue search for a command "+cmd+" returned more than one records, it must return only one record for the paramCode provided in the where clause");
 		
 		List<ParamValue> paramValues = searchResult.get(0).getParamValues();

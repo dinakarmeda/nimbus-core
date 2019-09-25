@@ -24,8 +24,7 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +32,7 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.repository.support.SpringDataMongodbQuery;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.FrameworkRuntimeException;
 import com.antheminc.oss.nimbus.domain.config.builder.DomainConfigBuilder;
@@ -75,7 +75,8 @@ public class MongoSearchByQueryOperation extends MongoDBSearchOperation {
 		private final AbstractMongodbQuery query;
 		
 		public QueryBuilder(MongoOperations mongoOps, Class<?> clazz, String collectionName) {
-			query = new SpringDataMongodbQuery<>(mongoOps, clazz, collectionName);
+//			query = new SpringDataMongodbQuery<>(mongoOps, clazz, collectionName);
+			query = null;
 		}
 		
 		public AbstractMongodbQuery get() {
@@ -193,7 +194,7 @@ public class MongoSearchByQueryOperation extends MongoDBSearchOperation {
 		String aggregateCollection = query.getString(Constants.SEARCH_REQ_AGGREGATE_MARKER.code);
 		List<Document> result = new ArrayList<Document>();
 		getMongoOps().getCollection(aggregateCollection).aggregate(pipeline).iterator().forEachRemaining(a -> result.add(a));
-		if(CollectionUtils.isNotEmpty(result)) {
+		if(!CollectionUtils.isEmpty(result)) {
 			GenericType gt = getMongoOps().getConverter().read(GenericType.class, new org.bson.Document(GenericType.CONTENT_KEY, result));
 			output.addAll(gt.getContent());
 		}

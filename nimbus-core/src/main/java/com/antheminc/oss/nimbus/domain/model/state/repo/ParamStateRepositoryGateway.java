@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.InvalidArgumentException;
 import com.antheminc.oss.nimbus.UnsupportedScenarioException;
@@ -185,7 +185,7 @@ public class ParamStateRepositoryGateway implements ParamStateGateway {
 		logit.trace(()->"_get of param: "+param);
 		
 		Object state = _get(defaultRepStrategy, param);
-		if(CollectionUtils.isNotEmpty(param.getConfig().getConverters())) {
+		if(!CollectionUtils.isEmpty(param.getConfig().getConverters())) {
 			for(ParamConverter converter: param.getConfig().getConverters()) {
 				state = converter.serialize(state);
 			}
@@ -345,7 +345,7 @@ public class ParamStateRepositoryGateway implements ParamStateGateway {
 		} else if(param.isLeaf()) {
 			Object parentModel = param.getParentModel().instantiateOrGet();//ensure mappedFrom model is instantiated
 			
-			if(CollectionUtils.isNotEmpty(param.getConfig().getConverters())) {
+			if(!CollectionUtils.isEmpty(param.getConfig().getConverters())) {
 				Collections.reverse(param.getConfig().getConverters());
 				Object output = newState;
 				for(ParamConverter converter: param.getConfig().getConverters()) {

@@ -17,7 +17,7 @@ package com.antheminc.oss.nimbus.domain.model.state.internal;
 
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.domain.model.config.ModelConfig;
 import com.antheminc.oss.nimbus.domain.model.config.ParamConfig;

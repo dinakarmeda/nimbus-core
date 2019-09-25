@@ -16,7 +16,6 @@
 package com.antheminc.oss.nimbus.domain.model.state.extension.conditionals;
 
 import java.lang.annotation.Annotation;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,11 +23,9 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import com.antheminc.oss.nimbus.AnnotationUtil;
-import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.Param;
 import com.antheminc.oss.nimbus.domain.model.state.extension.AbstractConditionalStateEventHandler;
-import com.antheminc.oss.nimbus.support.JustLogit;
 
 /**
  * <p>A conditional state event handler support class that performs subclass

@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
 import com.antheminc.oss.nimbus.domain.defn.extension.MessageConditional;
@@ -52,7 +52,7 @@ public class MessageConditionalHandler extends EvalExprWithCrudActions<MessageCo
 				Arrays.asList(targetPaths).stream()
 				.forEach(targetPath -> {
 					Param<?> targetParam = retrieveParamByPath(onChangeParam, targetPath);
-					if(CollectionUtils.isNotEmpty(targetParam.getMessages())) {
+					if(!CollectionUtils.isEmpty(targetParam.getMessages())) {
 						removeMessageFromParam(targetParam, configuredAnnotation);
 					}
 				});

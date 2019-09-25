@@ -21,8 +21,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.domain.defn.ViewConfig.Chart;
 import com.antheminc.oss.nimbus.domain.defn.ViewConfig.Grid;
@@ -109,7 +109,7 @@ public class DefaultJsonParamSerializer extends JsonSerializer<Param<?>> {
 			if(ArrayUtils.isNotEmpty(activeValidationGroups))
 				gen.writeObjectField(K_ACTIVE_VALS, p.getActiveValidationGroups());
 			
-			if(CollectionUtils.isNotEmpty(p.getMessages())) {
+			if(!CollectionUtils.isEmpty(p.getMessages())) {
 				writer.writeObjectIfNotNull(K_MESSAGE, p::getMessages);
 				
 				Set<Message> nonTransientMessages = p.getMessages().stream()

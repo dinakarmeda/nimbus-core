@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.InvalidConfigException;
 import com.antheminc.oss.nimbus.context.BeanResolverStrategy;
@@ -60,7 +60,7 @@ public class DroolsRulesEngineFactory implements RulesEngineFactory {
 				.collect(Collectors.toList());
 		
 		//Cannot have more than one supported strategy for the same rule alias. Ex. test.drl and test.xls
-		if (CollectionUtils.size(supportedStrategies) > 1) {
+		if (!CollectionUtils.isEmpty(supportedStrategies) && supportedStrategies.size() > 1) {
 			throw new InvalidConfigException("Found muliple rule files with the same name: "+alias);	
 			
 		} else if (CollectionUtils.isEmpty(supportedStrategies)) {

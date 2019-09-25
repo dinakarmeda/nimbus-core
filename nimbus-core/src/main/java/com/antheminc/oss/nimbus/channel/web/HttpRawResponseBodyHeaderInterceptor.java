@@ -15,7 +15,8 @@
  */
 package com.antheminc.oss.nimbus.channel.web;
 
-import org.apache.commons.collections.CollectionUtils;
+
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.MultiOutput;
 import com.antheminc.oss.nimbus.domain.cmd.exec.CommandExecution.Output;

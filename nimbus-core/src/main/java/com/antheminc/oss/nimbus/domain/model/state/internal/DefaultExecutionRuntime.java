@@ -22,7 +22,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.antheminc.oss.nimbus.domain.cmd.Command;
 import com.antheminc.oss.nimbus.domain.model.state.EntityState.ExecutionModel;
@@ -200,7 +200,7 @@ public class DefaultExecutionRuntime implements ExecutionRuntime {
 			_notifications.remove(event);
 			Param<Object> source =  event.getSource();
 			
-			if(CollectionUtils.isNotEmpty(source.getEventSubscribers()))
+			if(!CollectionUtils.isEmpty(source.getEventSubscribers()))
 				new ArrayList<>(source.getEventSubscribers())
 					.stream()
 						.forEach(subscribedParam->subscribedParam.handleNotification(event));
