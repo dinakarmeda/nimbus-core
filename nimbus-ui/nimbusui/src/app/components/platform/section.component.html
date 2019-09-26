@@ -7,6 +7,10 @@
     <!-- Loop thru Section Params - look at the visible flag and put in the right condition-->
     <ng-template [ngIf]="visible==true">
         <ng-template ngFor let-element [ngForOf]="nestedParams">
+            <!-- Section -->
+            <ng-template [ngIf]="element.alias == componentTypes.section.toString()">
+                <nm-section [element]="element" [position]="position+1" [nmPrint]="element" class="{{element.config?.uiStyles?.attributes?.cssClass}}"></nm-section>
+            </ng-template>
             <!-- Card Content -->
             <ng-template [ngIf]="element.alias == componentTypes.cardDetailsGrid.toString()">
                 <nm-card-details-grid id="{{element.config?.code}}" [position]="position+1" [element]="element" [nmPrint]="element"></nm-card-details-grid>
