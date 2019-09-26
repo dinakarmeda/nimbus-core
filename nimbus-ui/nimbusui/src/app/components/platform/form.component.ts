@@ -65,7 +65,7 @@ export class Form extends BaseElement implements OnInit, OnChanges {
   @Input() model: Model;
   id: string = 'nm-element' + uniqueId++;
   formId: string = 'nm-form' + uniqueId++;
-  form: NimbusFormGroup;
+  form: CustomFormGroup;
   opened: Boolean = true;
   formModel: FormModel[];
   formElementType = FormElementType;
@@ -287,6 +287,6 @@ export class Form extends BaseElement implements OnInit, OnChanges {
   }
 }
 
-export class NimbusFormGroup extends FormGroup {
+export class CustomFormGroup extends FormGroup {
   paramConfigs?: ParamConfig[];
 }

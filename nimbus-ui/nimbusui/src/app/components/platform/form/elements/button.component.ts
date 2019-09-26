@@ -41,7 +41,7 @@ import { ServiceConstants } from './../../../../services/service.constants';
 import { ViewConfig } from './../../../../shared/param-annotations.enum';
 import { ParamUtils } from './../../../../shared/param-utils';
 import { PrintConfig } from './../../../../shared/print-event';
-import { NimbusFormGroup } from '../../form.component';
+import { CustomFormGroup } from '../../form.component';
 import { ParamConfig } from '../../../../shared/param-config';
 
 /**
@@ -230,7 +230,7 @@ import { ParamConfig } from '../../../../shared/param-config';
 export class Button extends BaseElement {
   @Input() element: Param;
   @Input() payload: string;
-  @Input() form: NimbusFormGroup;
+  @Input() form: CustomFormGroup;
   @Input() actionTray?: boolean;
 
   @Output() buttonClickEvent = new EventEmitter();

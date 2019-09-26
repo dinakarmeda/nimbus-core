@@ -11,7 +11,7 @@ Launch app at "http://localhost:4200"
 
 Have the backend web project running on "http://localhost:8080"
 
-The default login page will be shown. Login as "swetha/swetha".
+The default login page will be shown. 
 
 ## Development server
 
